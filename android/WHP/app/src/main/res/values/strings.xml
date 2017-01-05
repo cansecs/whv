@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">WHP</string>
+    <string name="dummy_button">Test Button</string>
+    <string name="homehost">www.azure.cansecs.com</string>
+    <string name="homeproto">https://</string>
+    <string name="homepage">/vip/video/</string>
+    <string name="dummy_content" />
+    <string name="menu">靶</string>
+    <string name="FailedPage">
+&lt;html&gt;&lt;body&gt;&lt;H2&gt;出错了&lt;/H2&gt;&lt;/body&gt;&lt;/html&gt;
+    </string>
+    <string name="certificate">
+-----BEGIN CERTIFICATE-----
+MIID3zCCAsegAwIBAgIJAIn8dg1cNkgxMA0GCSqGSIb3DQEBCwUAMIGFMQswCQYD
+VQQGEwJDQTELMAkGA1UECAwCT04xFDASBgNVBAcMC01JU1NJU1NBVUdBMRkwFwYD
+VQQKDBBNJlMgU29mdCBDb21wYW55MRgwFgYDVQQDDA9jbjFwMy5uby1pcC5iaXox
+HjAcBgkqhkiG9w0BCQEWD2NuMXAzQGdtYWlsLmNvbTAeFw0xNjAxMTcxNTMzNDVa
+Fw0xNjAyMTYxNTMzNDVaMIGFMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xFDAS
+BgNVBAcMC01JU1NJU1NBVUdBMRkwFwYDVQQKDBBNJlMgU29mdCBDb21wYW55MRgw
+FgYDVQQDDA9jbjFwMy5uby1pcC5iaXoxHjAcBgkqhkiG9w0BCQEWD2NuMXAzQGdt
+YWlsLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALantO6XI0ke
+kLwYD9hwpzdaCwGIGARBOsHxnQnNUQcOGP1q4E2adm6ot59r/EGmrzTG3Ji3sNFs
+uKstFq7yqOnTqJl17A9nEEW5Ie10AMVAxMsMgc/28Z3Niim8MRTCnQXKufTEDA0W
+mvSKu1N72rjjeJJsk8asL8aalCW7DRE0wvcY4JDKU/rDXFQ7fJzDE2FeXNaFxlik
+NBq8cTrm/avx2EH6yO+uPtAKwTUynwnoKuzo9BeR5nnW7GHrJPoPm3wjcoB3bZhZ
+nKiPEjGVQlFQ18aRlyRxbsXa2vDE5DpFCcM0iVl364TzeHH7UKpSWKLXm/svgLTC
+4NCuwn+HFfkCAwEAAaNQME4wHQYDVR0OBBYEFDENOU0HUdM/hpZty/jravBHnpOY
+MB8GA1UdIwQYMBaAFDENOU0HUdM/hpZty/jravBHnpOYMAwGA1UdEwQFMAMBAf8w
+DQYJKoZIhvcNAQELBQADggEBAHG2D3SzMIsFOlcAVwB2KBYUS3WdIPHEBsdqRX6P
+vyFszy/3xIh7lNkUGJk8u8qXv8/p1anA1DQoL77X/RNSFyHo2uPOb1ODZVos+Xqs
+OBleMIh4LnNcGzmaZ4rxeTqtFfVd/jGrg3BsyqlK1hGme7AHehqwhfKBd6Dq47Rg
+hMVD2TMC1Yc8ZpCNxFAwlxqCrgWNkRkegaFGo1IJCa7pX/lzj11ZOp7F/8UjRN50
+RvcFmC+O4fSLRI3AzdlLrwAnCefPdyMo8HWE7xnYpb2zV2av1nMgmUkCaDxOHghv
+SXj/9sMNwjbzx13moL7+aIACryhTg0elD2xIb8+HU0sLPkk=
+-----END CERTIFICATE-----
+ </string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:support="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools">
+    <!-- <item
+        android:id="@+id/menu_share"
+        support:actionProviderClass="android.support.v7.widget.ShareActionProvider"
+        support:showAsAction="always"
+        android:title="" /> -->
+    <!-- <item
+        android:id="@+id/menu"
+        app:showAsAction="ifRoom"
+        android:title="="
+        android:visible="true"
+        android:enabled="true"
+        support:showAsAction="ifRoom" /> -->
+    <item android:id="@+id/points"
+        app:showAsAction="ifRoom"
+        android:title="Heart"
+        support:showAsAction="always"
+        android:visible="true"
+        android:enabled="true"
+        />
+</menu>

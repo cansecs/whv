@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="c936c1bd42f0c018c18920c7bec619ef056b24f8">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-animated-vector-drawable-24.1.1_c93a84235e2be313f7b6404cfe9cc948420348ee.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\support-v4\24.1.1\jars\libs\internal_impl-24.1.1.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="f78c2f395cb096f9dc1dc07e729922b8fcd3c4f5">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\internal_impl-24.1.1_1e6ff23ddeb8d2eb871e62c61d02228b633f32fa.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\cardview-v7\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="4add8aa95c9f4e9a2ad64b7e2bf08e97e28955c1">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-cardview-v7-24.1.1_2f663ae6f0f12a67d60b9bdb0a3e198113c63e0c.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="19dfa13d2af0b9aae5b086e7849319958591ee42">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\instant-run-bootstrap_03f731b2c467f7e61686aa5dde94fa278b2ec629.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="f62e763609f65e47dc6c498760a4accf02776788">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-support-vector-drawable-24.1.1_fd217e591e3e9152fa625c85ae63689c61ea76ad.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\.gradle\caches\modules-2\files-2.1\com.android.support\support-annotations\24.1.1\3af19f153122737b372622fa6c81dd11a1c6b999\support-annotations-24.1.1.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="3af19f153122737b372622fa6c81dd11a1c6b999">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\support-annotations-24.1.1_26c70bee9d11ea92dfa20b5af64643bf1436dfa8.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="4528e10e2872c4a7d0ff52e818d8e064c4ce1d6b">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\instant-run_2025c9d61d31f426e40496bec3b113eab2fdbbd1.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\appcompat-v7\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="1256c10604bb098490eab070d76754ac5ceab35c">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-appcompat-v7-24.1.1_2e56f20292e0795f914ae8ba09ae78cf35092d1c.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\gridlayout-v7\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="8a5380ddd58f4f8946ddade4c64dd77de4a836d5">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-gridlayout-v7-24.1.1_bab1b517ef626a2b0e1dbdb0647981011ccc9ca8.jar" />
+    </item>
+    <item
+        jar="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\exploded-aar\com.android.support\support-v4\24.1.1\jars\classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="6d7d803871e3203465f71a163e7af104f807b446">
+        <dex dex="C:\Users\chenches\maincode\android\android\ActionBarCompat-Basic\Application\build\intermediates\pre-dexed\debug\com.android.support-support-v4-24.1.1_4ef15535e2b6f139c8e0aa83bf5b051d96e550bd.jar" />
+    </item>
+
+</items>
