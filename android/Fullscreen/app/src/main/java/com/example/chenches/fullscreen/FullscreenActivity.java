@@ -171,7 +171,7 @@ public class FullscreenActivity extends AppCompatActivity {
             mWebView.post(new Runnable(){
                     @Override
                     public void run() {
-                mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage.replace("<head>",String.format("<base href='%s'/><head>",sPrefix)), "text/html", "UTF-8", null);
+                mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage, "text/html", "UTF-8", null);
             }
          });
         }
@@ -1550,6 +1550,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     String query = defaultCookie.replaceAll(";","&");
                     String policies = l.getContent(new URL(sPrefix + getString(R.string.policy)+"?"+query));
                     sPlayerPage = l.getContent(new URL(sPrefix+"/vip/video/"));
+                    sPlayerPage = sPlayerPage.replace("<head>",String.format("<base href='%s'/><head>",sPrefix)).replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>","");
                     oSitePolicy = new SitePolicy(policies);
                 }
             } catch (MalformedURLException e) {
