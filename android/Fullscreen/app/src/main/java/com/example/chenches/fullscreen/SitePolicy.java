@@ -64,6 +64,7 @@ public class SitePolicy {
             return url;
         }
         Site s = new Site(url);
+        if ( s == null ) return "";
         String key = "";
         if (map.containsKey(s.domain)) {
             key = s.domain;

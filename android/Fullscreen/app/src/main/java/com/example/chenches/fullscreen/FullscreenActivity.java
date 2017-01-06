@@ -51,6 +51,8 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.json.JSONArray;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -63,6 +65,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.RunnableFuture;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -88,11 +91,13 @@ public class FullscreenActivity extends AppCompatActivity {
     protected String sLANG = ""; // get what cookie value _v_ is, if it's zh_CN, it means chinese version, otherwise english
     private static final String sSchemaSuffix = "://";
     private static final String RELOAD = "reload"+sSchemaSuffix; // RELOAD schema
-    private String sAppName;
+    private static String sAppName;
+    private static String sDownloaddir;
     private String sDownloadSchema; // webview page can call this schema to download and save url schema://filename/url
     private String sMenuSchema; // Schema on different menu action schema://action
     private static final boolean AUTO_HIDE = true;
     private static String UA;
+    private static String sPlayerPage;
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
@@ -108,15 +113,67 @@ public class FullscreenActivity extends AppCompatActivity {
     private static boolean MENUSHOWN = false;
     private final Handler mHideHandler = new Handler();
 
-    List<String> oHistories = new ArrayList<String>();
+    ArrayList<String> oHistories = new ArrayList<String>();
 
     class WHVHist{ // return once a page loaded, all the urls that webview has visited
 
+        private String toJSONArr(List<String> list){
+            return toJSONArr(list,true);
+        }
+        private String toJSONArr(List<String> list,boolean quote){
+            String ret="[\"%s\"]",inside="",deli="\",\"";
+            if (!quote){
+                String quotes="\"";
+                ret=ret.replaceAll(quotes,"");
+                deli=deli.replaceAll(quotes,"");
+            }
+
+            int idx=0;
+            for (String items : list) {
+                inside+=items+(++idx<list.size()? deli:"");
+            }
+            return String.format(ret,inside);
+        }
         @JavascriptInterface
-        public String [] visits(){
-            String[] ret = new String[oHistories.size()];
-            oHistories.toArray(ret);
-            return ret;
+        public String visits() {
+            return toJSONArr(oHistories);
+        }
+
+        @JavascriptInterface
+        public String listDownloads() {
+            return toJSONArr(listFiles(),false);
+        }
+
+        @JavascriptInterface
+        public void removeFile(String filename){
+            File file = new File(filename);
+            file.delete();
+        }
+        private List<String> listFiles(){
+            ArrayList<String> lists=new ArrayList<String>();
+            if (sDownloaddir ==null || sDownloaddir.isEmpty()) return lists;
+            File direct = new File(sDownloaddir);
+
+            if (direct.exists()) {
+                File [] files = direct.listFiles();
+                for (File file : files) {
+                    ArrayList<String> items = new ArrayList<>();
+                    items.add(file.getAbsolutePath());
+                    items.add(String.format("%s",file.lastModified()));
+                    lists.add(toJSONArr(items));
+                }
+            }
+            return lists;
+        }
+
+        @JavascriptInterface
+        public void Player(){
+            mWebView.post(new Runnable(){
+                    @Override
+                    public void run() {
+                mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage.replace("<head>",String.format("<base href='%s'/><head>",sPrefix)), "text/html", "UTF-8", null);
+            }
+         });
         }
     }
     /**
@@ -462,8 +519,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         }
 
-        File direct = new File(Environment.getExternalStorageDirectory()
-                + "/"+appName);
+        File direct = new File(sDownloaddir);
 
         if (!direct.exists()) {
             boolean success=false;
@@ -986,6 +1042,7 @@ public class FullscreenActivity extends AppCompatActivity {
         /*Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);*/
         sAppName = getString(R.string.app_name).toLowerCase();
+        sDownloaddir = Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
         sDownloadSchema = sAppName + sSchemaSuffix;
         sMenuSchema = "menu"+sDownloadSchema;
 
@@ -1492,6 +1549,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     defaultCookie=l.getContent(new URL(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name)));
                     String query = defaultCookie.replaceAll(";","&");
                     String policies = l.getContent(new URL(sPrefix + getString(R.string.policy)+"?"+query));
+                    sPlayerPage = l.getContent(new URL(sPrefix+"/vip/video/"));
                     oSitePolicy = new SitePolicy(policies);
                 }
             } catch (MalformedURLException e) {

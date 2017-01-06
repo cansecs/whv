@@ -37,16 +37,24 @@ public class loadbalance {
                 if (charset != null) {
                     InputStream is = null;
                     try {
-                        is = connection.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
-                        content = reader.readLine();
-                        if (is != null) {
-                            is.close();
+                        try {
+                            is = connection.getInputStream();
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(is, charset));
+                            content = "";
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                content += line;
+                            }
+                            if (is != null) {
+                                is.close();
+                            }
+                        } finally {
+                            if (is != null) {
+                                is.close();
+                            }
                         }
-                    } finally {
-                        if (is != null) {
-                            is.close();
-                        }
+                    }catch(java.io.IOException e){
+                        e.printStackTrace();
                     }
                 }
             }
