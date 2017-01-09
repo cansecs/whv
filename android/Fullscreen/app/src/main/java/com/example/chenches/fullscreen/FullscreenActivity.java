@@ -479,7 +479,7 @@ public class FullscreenActivity extends AppCompatActivity {
         String htmlData = getString(R.string.FailedPage);
         String title=T("Error","出了点问题");
         String common = T("Network issue?","网络有问题？")+"<br/>";
-        if (msg == null || msg.equals("")){
+        if (msg == null || msg.isEmpty()){
             msg= String.format(T("Take a break, then click <a href='%s'>here to retry.</a>, or check your <a href='javascript:%s'>cached</a> files?","休息一会儿点<a href='%s'>这里</a>再试一下,或者看看<a href='javascript:%s'>缓存的视频</a>"),RELOAD,JSPlayer);
         }
         view.loadUrl("about:blank");
@@ -1099,9 +1099,7 @@ public class FullscreenActivity extends AppCompatActivity {
             @Override
             public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
                 super.errorHandling(view,errorCode,description,failingUrl);
-                if (failingUrl.equalsIgnoreCase(view.getUrl())){ // TODO: 10/3/2016 check the errorCode?
-                    displayErrorPage(view,String.format("<a href='%s'>",JSObj+"._closeall()")+T("Please close this APP completedly, check your netork and reopen it again!","请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看")+"</a>");
-                }
+                displayErrorPage(view,String.format("<a href='%s'>",JSObj+"._closeall()")+T("Please close this APP completedly, check your netork and reopen it again!","请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看")+"</a>");
             }
         });
 
