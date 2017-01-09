@@ -7,13 +7,6 @@
         support:actionProviderClass="android.support.v7.widget.ShareActionProvider"
         support:showAsAction="always"
         android:title="" /> -->
-    <!-- <item
-        android:id="@+id/menu"
-        app:showAsAction="ifRoom"
-        android:title="="
-        android:visible="true"
-        android:enabled="true"
-        support:showAsAction="ifRoom" /> -->
     <item android:id="@+id/points"
         app:showAsAction="ifRoom"
         android:title="Heart"
@@ -21,4 +14,18 @@
         android:visible="true"
         android:enabled="true"
         />
+    <item
+        android:id="@+id/menu"
+        app:showAsAction="never"
+        android:title="="
+        android:visible="true"
+        android:enabled="true"
+        support:showAsAction="never" />
+    <item
+        android:id="@+id/close"
+        app:showAsAction="never"
+        android:title="X"
+        android:visible="true"
+        android:enabled="true"
+        support:showAsAction="never" />
 </menu>

@@ -337,5 +337,30 @@ public class SSLTolerentWebViewClient extends WebViewClient {
         return _sOUL(view,url,null);
     }
 
+    public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
+        Log.d("View Error",String.format("%s on %s %d %s",view.getUrl(),failingUrl,errorCode,description));
+    }
+    @Override
+    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        errorHandling(view,errorCode,description,failingUrl);
+    }
+
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest request,
+                                WebResourceError error) {
+        Log.d("Header", "Am I being called here?");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            String url = request.getUrl().toString(),desc="Unkown"; int errcode=-1;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                errcode=error.getErrorCode();
+                desc=error.getDescription().toString();
+            }
+            errorHandling(view,errcode,desc,url);
+        }
+        //To Prevent  Web page not available
+
+    }
+
 
 }

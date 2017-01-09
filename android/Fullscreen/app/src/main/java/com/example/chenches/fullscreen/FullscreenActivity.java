@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -98,6 +100,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final boolean AUTO_HIDE = true;
     private static String UA;
     private static String sPlayerPage;
+
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
@@ -167,15 +170,16 @@ public class FullscreenActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
+        public void _closeall(){
+            close();
+        }
+        @JavascriptInterface
         public void Player(){
-            mWebView.post(new Runnable(){
-                    @Override
-                    public void run() {
-                mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage, "text/html", "UTF-8", null);
-            }
-         });
+            loadPlayer();
         }
     }
+    private static final String JSObj = "SNIFFER";
+    private static final String JSPlayer = JSObj+".Player()";
     /**
      * Menu action string defined here
      */
@@ -383,6 +387,11 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isConnected(){
+        NetworkInfo net = ((ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return net != null && net.isConnected();
+    }
+
     private static void restoreUA(WebSettings settings){
         changeUA(settings,null);
     }
@@ -405,7 +414,7 @@ public class FullscreenActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setLoadWithOverviewMode(true);
-        //settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         if ( originalUA == null ) {
             originalUA=String.format("%s %s", settings.getUserAgentString(), UA);
         }
@@ -425,10 +434,6 @@ public class FullscreenActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         */
         int value;
-        FrameLayout.LayoutParams fl= new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
-        Window win = getWindow();
-        WindowManager.LayoutParams attrs = win.getAttributes();
-        int full = WindowManager.LayoutParams.FLAG_FULLSCREEN, normal = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
         if ( rotated()) {
             value=View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -436,19 +441,13 @@ public class FullscreenActivity extends AppCompatActivity {
                     |View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                        ;
-            win.clearFlags(normal);
-            win.addFlags(full);
             hideSystemBar();
         }else{
-            win.clearFlags(full);
-            win.addFlags(normal);
             value = 0; /*View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     |View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     |View.SYSTEM_UI_FLAG_FULLSCREEN
                     |View.SYSTEM_UI_FLAG_VISIBLE;*/
         }
-        win.setAttributes(attrs);
-        view.setLayoutParams(fl);
         view.setSystemUiVisibility(value);
 
         return;
@@ -479,13 +478,13 @@ public class FullscreenActivity extends AppCompatActivity {
         //view.loadData("", "", null);
         String htmlData = getString(R.string.FailedPage);
         String title=T("Error","出了点问题");
-        String common = String.format(T("Take a break, then click <a href='%s'>here to retry.</a>","休息一会儿点<a href='%s'>这里</a>再试一下"),RELOAD);
+        String common = T("Network issue?","网络有问题？")+"<br/>";
         if (msg == null || msg.equals("")){
-            msg= T("Network issue?","网络有问题？")+"<br/>";
+            msg= String.format(T("Take a break, then click <a href='%s'>here to retry.</a>, or check your <a href='javascript:%s'>cached</a> files?","休息一会儿点<a href='%s'>这里</a>再试一下,或者看看<a href='javascript:%s'>缓存的视频</a>"),RELOAD,JSPlayer);
         }
         view.loadUrl("about:blank");
         //view.loadData(String.format(htmlData,title,msg+common), "text/html", "UTF-8");
-        view.loadDataWithBaseURL(HOMEPAGE, String.format(htmlData,title,msg+common), "text/html", "UTF-8", null);
+        view.loadDataWithBaseURL(HOMEPAGE, String.format(htmlData,title,common+msg), "text/html", "UTF-8", null);
         //view.invalidate();
     }
 
@@ -622,6 +621,14 @@ public class FullscreenActivity extends AppCompatActivity {
         MENUSHOWN = false;
     }
 
+    protected void toggleWebMenu(){
+        if (MENUSHOWN){
+            hideWebMenu();
+        }else{
+            showWebMenu();
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         hide();
@@ -629,7 +636,7 @@ public class FullscreenActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_BACK:
                 break;
             case KeyEvent.KEYCODE_MENU:
-                showWebMenu();
+                toggleWebMenu();
                 break;
         }
         return super.onKeyDown(keyCode, event);
@@ -954,12 +961,18 @@ public class FullscreenActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.home:
-                showWebMenu();
+                toggleWebMenu();
                 return true;
             case R.id.points:
                 // TODO Add in-App Purchase function here
                 //appnext.run();
                 ads.run();
+                return true;
+            case R.id.menu:
+                loadPlayer();
+                return true;
+            case R.id.close:
+                close();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1010,7 +1023,7 @@ public class FullscreenActivity extends AppCompatActivity {
     }
     @Override
     public boolean onSupportNavigateUp(){
-        showWebMenu();
+        toggleWebMenu();
         return true;
     }
 
@@ -1082,6 +1095,14 @@ public class FullscreenActivity extends AppCompatActivity {
                 }
                 return super.urlHandler(view, url, headers);
             }
+
+            @Override
+            public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
+                super.errorHandling(view,errorCode,description,failingUrl);
+                if (failingUrl.equalsIgnoreCase(view.getUrl())){ // TODO: 10/3/2016 check the errorCode?
+                    displayErrorPage(view,String.format("<a href='%s'>",JSObj+"._closeall()")+T("Please close this APP completedly, check your netork and reopen it again!","请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看")+"</a>");
+                }
+            }
         });
 
         mWebView = (WebView) findViewById(R.id.webView);
@@ -1098,7 +1119,7 @@ public class FullscreenActivity extends AppCompatActivity {
         //mWebView.addJavascriptInterface(new dumb(),"MediaSource");
         //mWebView.addJavascriptInterface(new dumb(),"webkitMediaSource");
 
-        mWebView.addJavascriptInterface(new WHVHist(),"SNIFFER");
+        mWebView.addJavascriptInterface(new WHVHist(),JSObj);
 
         mWebView.setWebViewClient(
                 new SSLTolerentWebViewClient() {
@@ -1151,6 +1172,8 @@ public class FullscreenActivity extends AppCompatActivity {
                             pointState.parse(cookie);
                             Log.d("Point",pointState.toString());
                             oMenu.findItem(R.id.points).setTitle(T("Points","积分")+"\n"+pointState.getPoints());
+                            oMenu.findItem(R.id.menu).setTitle(T("Local cache","本地缓存"));
+                            oMenu.findItem(R.id.close).setTitle(T("Exit","退出"));
                         }
                         //if ( oldversion ){
                         String othercookie="",referer=lastURL;
@@ -1275,40 +1298,23 @@ public class FullscreenActivity extends AppCompatActivity {
                         return super.urlHandler(view, url, headers);
                     }
 
-                    void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
-                        Log.d("View Error",String.format("%s on %s %d %s",view.getUrl(),failingUrl,errorCode,description));
+                    @Override
+                    public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
+                        super.errorHandling(view,errorCode,description,failingUrl);
                         if (failingUrl.equalsIgnoreCase(view.getUrl())){ // TODO: 10/3/2016 check the errorCode?
                             displayErrorPage(view,"");
                         }
                         // ignore it
                     }
 
-                    @Override
-                    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                        errorHandling(view,errorCode,description,failingUrl);
-                    }
-
-                    @Override
-                    public void onReceivedError(WebView view, WebResourceRequest request,
-                                                WebResourceError error) {
-                        Log.d("Header", "Am I being called here?");
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            String url = request.getUrl().toString(),desc="Unkown"; int errcode=-1;
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                errcode=error.getErrorCode();
-                                desc=error.getDescription().toString();
-                            }
-                            errorHandling(view,errcode,desc,url);
-                        }
-                        //To Prevent  Web page not available
-
-                    }
                 }
         );
         // Here, we use #mWebChromeClient with implementation for handling PermissionRequests.
         mWebView.setWebChromeClient(mWebChromeClient);
         configureWebSettings(mWebView.getSettings());
+        mWebView.getSettings().setAppCacheEnabled(true);
+        mWebView.getSettings().setAppCachePath(getCacheDir().getPath());
+
         configureWebSettings(mMenuView.getSettings());
         //pickUserAccount();
         new findHome().execute();
@@ -1409,6 +1415,11 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
+    private void close(){
+        finish();
+        System.exit(0);
+    }
+
     private void hide() {
         if ( rotated() ) {
             // Hide UI first
@@ -1440,7 +1451,14 @@ public class FullscreenActivity extends AppCompatActivity {
         // Show the system bar
         /*mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);*/
-        setTitle(mWebView.getTitle());
+        String title=mWebView.getTitle();
+        if ( title.matches("^(http(s)?|about).*$")){
+            title = getString(R.string.app_desc);
+        }
+        if ( ! isConnected()){
+            title += T("(Offline)","(离线)");
+        }
+        setTitle(title);
         hideSystemBar(false);
         int value;
         if ( rotated()) {
@@ -1474,6 +1492,21 @@ public class FullscreenActivity extends AppCompatActivity {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
 
+    }
+
+    public void loadPlayer(){
+        mWebView.post(new Runnable(){
+            @Override
+            public void run() {
+                WebSettings ws=mWebView.getSettings();
+                int v=WebSettings.LOAD_CACHE_ONLY;
+                if (isConnected()) {
+                    v=WebSettings.LOAD_CACHE_ELSE_NETWORK;
+                }
+                ws.setCacheMode(v);
+                mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage, "text/html", "UTF-8", null);
+            }
+        });
     }
 
     @Override
@@ -1549,8 +1582,34 @@ public class FullscreenActivity extends AppCompatActivity {
                     defaultCookie=l.getContent(new URL(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name)));
                     String query = defaultCookie.replaceAll(";","&");
                     String policies = l.getContent(new URL(sPrefix + getString(R.string.policy)+"?"+query));
-                    sPlayerPage = l.getContent(new URL(sPrefix+"/vip/video/"));
-                    sPlayerPage = sPlayerPage.replace("<head>",String.format("<base href='%s'/><head>",sPrefix)).replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>","");
+                    String sPlayerPageURL = sPrefix+getString(R.string.playerPage),c=sPlayerPageURL+"?script=1";
+                    /*String script=String.format("<script>$(function(){\n" +
+                            "var o={};\n" +
+                            "var c=function(){\n" +
+                            "var p='#nav-panel',pa=$(p),ret=false;\n" +
+                            "if ( pa.length > 0 ){\n" +
+                            "  if ( pa.panel().panel('open')){\n" +
+                            "    $.getScript('%s');" +
+                            "    ret=true;\n" +
+                            "  }\n" +
+                            "}\n" +
+                            "  if ( ret && o.timer) {\n" +
+                            "   clearInterval(o.timer);\n" +
+                            "  }\n" +
+                            "}\n" +
+                            "o.timer=setInterval(c,1e3);\n" +
+                            "\n" +
+                            "})</script>",c);
+                    */
+                    String script=String.format("<script>notyet=function(){" +
+                            "$('#nav-panel').panel().panel('open');" +
+                            "};$.getScript('%s');</script>",c);
+                    sPlayerPage = l.getContent(new URL(sPlayerPageURL));
+                    sPlayerPage = sPlayerPage
+                            .replace("<head>",String.format("<base href='%s'/><head>",sPrefix))
+                            .replace("</body>",script+"</body>")
+                            .replace("notyet()","")
+                            .replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>","");
                     oSitePolicy = new SitePolicy(policies);
                 }
             } catch (MalformedURLException e) {

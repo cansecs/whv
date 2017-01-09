@@ -18,7 +18,7 @@
     <string name="app_name">WHV</string>
     <string name="app_desc">虫洞影视</string>
     <!-- -->
-
+    <string name="playerPage">/vip/video/</string>
     <string name="backhome"></string>
     <string name="uuid">uuid</string>
     <string name="homehost">www.azure</string>
