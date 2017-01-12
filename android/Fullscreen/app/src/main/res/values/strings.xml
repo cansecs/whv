@@ -21,7 +21,7 @@
     <string name="playerPage">/vip/video/</string>
     <string name="backhome"></string>
     <string name="uuid">uuid</string>
-    <string name="homehost">www.zure</string>
+    <string name="homehost">www.azure</string>
     <string name="subdomain">cansecs.com</string>
     <string name="homeproto">https://</string>
     <string name="homepage">/?nomenu</string>
