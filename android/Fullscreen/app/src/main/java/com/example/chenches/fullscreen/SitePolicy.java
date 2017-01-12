@@ -18,6 +18,7 @@ public class SitePolicy {
     private class Site{
         String domain="",site="";
         public Site(String url){
+            if ( url == null) return;
             try {
                 URL u = new URL(url);
                 String host = u.getHost();

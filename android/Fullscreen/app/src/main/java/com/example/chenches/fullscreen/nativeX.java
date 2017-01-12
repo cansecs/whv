@@ -22,8 +22,25 @@ import com.nativex.monetization.listeners.OnAdEvent;
 import com.nativex.monetization.listeners.SessionListener;
 import com.nativex.monetization.mraid.AdInfo;
 
-public class nativeX {
+public class nativeX extends _Ads {
     // Native X
+    public nativeX(FullscreenActivity activity){
+        super(activity);
+
+        this.ctx = activity.getApplicationContext();
+        MonetizationManager.enableLogging(true);
+        MonetizationManager.createSession(this.ctx, "112819", "cansecs.com@gmail.com", sessionListener);
+        MonetizationManager.setCurrencyListener(callback);
+        MonetizationManager.setRewardListener(rewardListener);
+        setIcon("http://www.nativex.com/wp-content/uploads/2016/11/nativex-logo2-300x130.png");
+        setDescription(
+                "Fast and easy, have a fair amount of choices",
+                "Only can credit you one point or less a time. Need to read about the instruction before your action",
+                "简单易操作，有不少的选择。在几分钟之内就可以获得积分",
+                "一次只能积到较少的积分，而且需要仔细阅读英文说明，知道它需要什么操作，否则会视为无效。"
+        );
+
+    }
     private SessionListener sessionListener = new SessionListener() {
         @Override
         public void createSessionCompleted(boolean success, boolean isOfferWallEnabled, String sessionId) {
@@ -50,7 +67,7 @@ public class nativeX {
                 Log.d("Sample", "Reward: rewardName:" + reward.getRewardName()
                         + " rewardId:" + reward.getRewardId()
                         + " amount:" + Double.toString(reward.getAmount()));
-                // add the reward amount to the total
+                // add the reward amount to the toprivate Context ctx;tal
                 totalRewardAmount += reward.getAmount();
             }
         }
@@ -65,18 +82,10 @@ public class nativeX {
     };
 
 
-    private Activity activity;
     NativeXAdPlacement placement = NativeXAdPlacement.Game_Launch;
-    public nativeX(Activity activity){
-        this.activity = activity;
-        this.ctx = activity.getApplicationContext();
-        MonetizationManager.enableLogging(true);
-        MonetizationManager.createSession(this.ctx, "112819", "cansecs.com@gmail.com", sessionListener);
-        MonetizationManager.setCurrencyListener(callback);
 
-        MonetizationManager.setRewardListener(rewardListener);
-    }
 
+    @Override
     public void run(){
 
         MonetizationManager.fetchAd(activity, placement, onAdEventListener);

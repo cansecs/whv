@@ -20,11 +20,29 @@ public class PointState {
     public String user;
     public Date expire;
     private long points;
-    private final static String cookiePattern="^.*?cn1p3=([^;]+).*$";
+    private final static String rawcookie="whtoken";
+    private final static String usercookie="cn1p3";
+    private final static String cookiePattern="^.*?%s=([^;]+).*$";
+
     private final static String expireField = "e";
     private final static String userField = "u";
+    private String cookie = "";
     public String getPoints(){
         return String.format("%.1f", ((float)Points()/ (24 * 60 * 60 * 1000))); // Format d.d day as points
+    }
+
+    public String getRaw(){
+        return getCookie(rawcookie);
+    }
+
+    public String getCookie(String key){
+        String cook=String.format(cookiePattern,key);
+        String value = "";
+        if ( cookie.matches(cook) ) {
+            value = cookie.replaceAll(cook,"$1");
+        }
+        Log.d("Cookie Found:",cookie+":"+value);
+        return value;
     }
 
     @Override
@@ -47,13 +65,9 @@ public class PointState {
     private boolean isValid(String value){
         return value != null && (value.startsWith("{") && value.endsWith("}"));
     }
-    public void parse(String cookie){
-        String cook=cookiePattern;
-        String value = "";
-        if ( cookie.matches(cook) ) {
-            value = cookie.replaceAll(cook,"$1");
-        }
-        Log.d("Cookie Found:",cookie+":"+value);
+    public void parse(String c){
+        cookie = c;
+        String value=getCookie(usercookie);
         if ( !isValid(value)) try {
             value = new String(Base64.decode(value, Base64.DEFAULT), "UTF-8");
         } catch (IllegalArgumentException | UnsupportedEncodingException e) {
@@ -78,6 +92,7 @@ public class PointState {
     }
     public PointState(String cookie){
         if ( ! ( cookie == null || cookie.equals(""))) {
+            this.cookie=cookie;
             parse(cookie);
         }
     }

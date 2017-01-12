@@ -3,6 +3,8 @@
     package="com.example.chenches.fullscreen">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -16,9 +18,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- proider for offline download video -->
         <provider
             android:authorities="whvcontent"
             android:name="whvcontent" />
+
+        <!-- nativex ads -->
         <activity
             android:name="com.nativex.monetization.activities.InterstitialActivity"
             android:configChanges="orientation|screenSize"
@@ -29,6 +34,23 @@
             android:name="com.nativex.videoplayer.VideoActivity"
             android:configChanges="orientation|screenSize" />
 
+        <!-- Ironsrc ads -->
+        <activity
+            android:name="com.supersonicads.sdk.controller.ControllerActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true" />
+        <activity
+            android:name="com.supersonicads.sdk.controller.InterstitialActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.Translucent" />
+        <activity
+            android:name="com.supersonicads.sdk.controller.OpenUrlActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.Translucent" />
+
+
         <activity
             android:name=".FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -36,9 +58,9 @@
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                
-
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
         </activity><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->

@@ -30,7 +30,19 @@ public class whvcontent extends ContentProvider {
     @Nullable
     @Override
     public String getType(Uri uri) {
-        return "video/mp4";
+        String path = uri.getPath();
+        String ret="text/html";
+        if ( path.endsWith(".js")){
+            ret="text/javascript";
+        }else if (path.endsWith(".css")){
+            ret="text/css";
+        }else if (path.endsWith(".mp4")){
+            ret="video/mp4";
+        }else{
+            Log.d("UnknownTYPE",path);
+        }
+        return ret;
+
     }
 
     @Nullable
@@ -53,11 +65,21 @@ public class whvcontent extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode) {
         String path= uri.getPath();
         Log.d("Content:","->"+uri+" =>"+path);
+
         ParcelFileDescriptor parcel = null;
+        File file = new File(path);
         try{
-            File file = new File(path);
+
+            if (!file.exists()){
+
+                file = new File(loadbalance.cacheDir,loadbalance.flatten(path));
+                Log.d("Contenthere",file.getAbsolutePath());
+            }else{
+                Log.d("Contentright",file.getAbsolutePath());
+            }
                 parcel = ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
+                Log.d("contenterr:",String.format("%s->%s",file.getAbsolutePath(),file.exists()));
                 e.printStackTrace();
             }
         return parcel;

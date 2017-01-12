@@ -5,8 +5,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -18,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.v7.app.ActionBar;
@@ -55,9 +58,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -68,6 +78,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RunnableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -87,7 +99,7 @@ public class FullscreenActivity extends AppCompatActivity {
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
 
-
+    private static final String contentprovider = "content://whvcontent/";
     private static final String sLangCookie = "_v_";
     private static final String sLangPattern = String.format("^.*%s=([^;]+).*$",sLangCookie); // detect cookie lang pattern
     protected String sLANG = ""; // get what cookie value _v_ is, if it's zh_CN, it means chinese version, otherwise english
@@ -99,7 +111,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private String sMenuSchema; // Schema on different menu action schema://action
     private static final boolean AUTO_HIDE = true;
     private static String UA;
-    private static String sPlayerPage;
+    private static String sPlayerPage = "";
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -115,6 +127,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private static String originalUA;
     private static boolean MENUSHOWN = false;
     private final Handler mHideHandler = new Handler();
+
+    protected static List<Object> innerObjects = new ArrayList<>();
 
     ArrayList<String> oHistories = new ArrayList<String>();
 
@@ -199,7 +213,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final String smAccount = "account";
     private static final String smPower = "power";
     private static String defaultCookie = "";
-    private String androidId; // storing android UID to feed into cookie string to indentify the uniquness of a device
+    protected String androidId; // storing android UID to feed into cookie string to indentify the uniquness of a device
     private enum PAGESTATE { // repsents a page is in the following states
         PROVED, // URL host is in the sSites
         SAFE, // URL contains our subdomain
@@ -250,7 +264,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     };
     private CookieManager mCookie;
-    private PointState pointState = new PointState(null);
+    protected PointState pointState = new PointState(null);
     private String sSites = null; // Sites that APP can handle
     private String sJSSites = "";
     private String sLastURL = null; // Last URL app visited
@@ -387,7 +401,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isConnected(){
+    protected boolean isConnected(){
         NetworkInfo net = ((ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         return net != null && net.isConnected();
     }
@@ -397,12 +411,13 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private static void configureWebSettings(WebSettings settings) {
+    private void configureWebSettings(WebSettings settings) {
         settings.setJavaScriptEnabled(true);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-            settings.setAllowFileAccessFromFileURLs(true);
-            settings.setAllowUniversalAccessFromFileURLs(true);
+            settings.setAllowFileAccess(true);
+            //settings.setAllowFileAccessFromFileURLs(true);
+            //settings.setAllowUniversalAccessFromFileURLs(true);
         }
 
 
@@ -414,7 +429,16 @@ public class FullscreenActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setLoadWithOverviewMode(true);
-        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        int mode = WebSettings.LOAD_DEFAULT;
+        if (!isConnected()){
+            mode=WebSettings.LOAD_CACHE_ELSE_NETWORK;
+        }
+        settings.setCacheMode(mode);
+        settings.setAppCacheEnabled(true);
+        settings.setAppCachePath(getCacheDir().getPath());
+
+        //settings.setAllowFileAccess(true);
+
         if ( originalUA == null ) {
             originalUA=String.format("%s %s", settings.getUserAgentString(), UA);
         }
@@ -662,10 +686,36 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
+    protected void call(List<Object> objects, String method){
+        Method methodobj = null;
+        for (Object obj:objects
+             ) {
+            try {
+                methodobj = obj.getClass().getMethod(method);
+            } catch (NoSuchMethodException|SecurityException e) {
+                e.printStackTrace();
+            }
+            try{
+                if ( methodobj != null ) {
+                    methodobj.invoke(obj);
+                }
+            }catch(IllegalArgumentException|IllegalAccessException|InvocationTargetException e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    protected void callAll(String method){
+        call(innerObjects,method);
+    }
     @Override
     protected void onPause() {
         super.onPause();    //To change body of overridden methods use File | Settings | File Templates.
-        mWebView.onPause();
+        callAll("onPause");
+        //mWebView.onPause();
+        //mMenuView.onPause();
+
     }
 
     private void _loadScript(String script,WebView view){
@@ -679,7 +729,7 @@ public class FullscreenActivity extends AppCompatActivity {
     protected void loadMenuPage(){
         String url = mWebView.getUrl();
         String suburl=url.replaceAll("^(https://.*?)(http(?:s)?://.*)$","$2");
-        if (!currentSite.isEmpty()) suburl=currentSite;
+        if (!(currentSite == null || currentSite.isEmpty())) suburl=currentSite;
         String site = oSitePolicy.getKey(suburl,true);
         loadMenuPage(site);
 
@@ -706,7 +756,9 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();    //To change body of overridden methods use File | Settings | File Templates.
-        mWebView.onResume();
+        //mWebView.onResume();
+        //mMenuView.onResume();
+        callAll("onResume");
         hide();
     }
 
@@ -1099,7 +1151,9 @@ public class FullscreenActivity extends AppCompatActivity {
             @Override
             public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
                 super.errorHandling(view,errorCode,description,failingUrl);
-                displayErrorPage(view,String.format("<a href='%s'>",JSObj+"._closeall()")+T("Please close this APP completedly, check your netork and reopen it again!","请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看")+"</a>");
+                if ( ! view.getUrl().startsWith("data:")) {
+                    displayErrorPage(view, String.format("<a href='%s'>", JSObj + "._closeall()") + T("Please close this APP completedly, check your netork and reopen it again!", "请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看") + "</a>");
+                }
             }
         });
 
@@ -1220,6 +1274,7 @@ public class FullscreenActivity extends AppCompatActivity {
                                             || path.endsWith("get.json")
                                             || path.endsWith("api/modules/api")
                             );
+
                         }
                         return intercept || super.needCustomHeader(url);
                     }
@@ -1239,9 +1294,13 @@ public class FullscreenActivity extends AppCompatActivity {
                             return true;
                         }else if (url.startsWith(sMenuSchema)){
                             return menuHandler(url);
+                        }else if ( url.startsWith(contentprovider)){
+                            Log.d("Contenthandler",url);
+                            url=url.replace(contentprovider,sPrefix+"/");
+                            return true;
                         }
                         else if ( url.startsWith(RELOAD)) { // server error, try to relocate the server URL
-                            new findHome().execute();
+                            Launch();
                             return true;
                         }
                             //String script = oSitePolicy.getScript(url);
@@ -1310,12 +1369,16 @@ public class FullscreenActivity extends AppCompatActivity {
         // Here, we use #mWebChromeClient with implementation for handling PermissionRequests.
         mWebView.setWebChromeClient(mWebChromeClient);
         configureWebSettings(mWebView.getSettings());
-        mWebView.getSettings().setAppCacheEnabled(true);
-        mWebView.getSettings().setAppCachePath(getCacheDir().getPath());
 
         configureWebSettings(mMenuView.getSettings());
         //pickUserAccount();
-        new findHome().execute();
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Launch();
+            }
+        },new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        Launch();
         /*mWebView.post(new Runnable() {
             @Override
             public void run() {
@@ -1390,6 +1453,10 @@ public class FullscreenActivity extends AppCompatActivity {
 
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         // Ads initilazation
+
+        innerObjects.add(mMenuView);
+        innerObjects.add(mWebView);
+
         ads = new Ads(this);
         // Ads setup ends
 
@@ -1496,12 +1563,12 @@ public class FullscreenActivity extends AppCompatActivity {
         mWebView.post(new Runnable(){
             @Override
             public void run() {
-                WebSettings ws=mWebView.getSettings();
+                /*WebSettings ws=mWebView.getSettings();
                 int v=WebSettings.LOAD_CACHE_ONLY;
                 if (isConnected()) {
                     v=WebSettings.LOAD_CACHE_ELSE_NETWORK;
                 }
-                ws.setCacheMode(v);
+                ws.setCacheMode(v);*/
                 mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage, "text/html", "UTF-8", null);
             }
         });
@@ -1527,7 +1594,16 @@ public class FullscreenActivity extends AppCompatActivity {
         AppIndex.AppIndexApi.start(client, viewAction); */
     }
 
+    private  void Launch(){
+        new findHome(this).execute();
+    }
+
     private class findHome extends AsyncTask<Void, Void, String> {
+
+        Activity activity;
+        public findHome(Activity activity){
+            this.activity =  activity;
+        }
 
         private boolean exception = false;
 
@@ -1562,7 +1638,11 @@ public class FullscreenActivity extends AppCompatActivity {
             String[] candidates=new String[]{proto+homehost+site,proto+getString(R.string.backhome)+site};
             //String[] candidates=new String[]{proto+getString(R.string.homehost)+site};
             String candidate;
-            loadbalance l=new loadbalance();
+            loadbalance l=new loadbalance(activity);
+            l.cacheDir=getFilesDir().getAbsolutePath();
+            exception=l.offline=!isConnected();
+            final loadbalance _l = l;
+
             String check="sites=",pattern= "^[^\"]+\"(.*)\"[^\"]+$";
             String[] can=l.chooseCandidates(candidates,check);
             if ( can == null ) {
@@ -1575,54 +1655,73 @@ public class FullscreenActivity extends AppCompatActivity {
             }
             sSafeSite=candidate.replaceAll("(^.*?)(\\w+\\.\\w+$)","$2"); // e.g our main site containing subdomain
             sPrefix= proto+candidate;
-            try {
-                if ( !exception) {
-                    defaultCookie=l.getContent(new URL(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name)));
-                    String query = defaultCookie.replaceAll(";","&");
-                    String policies = l.getContent(new URL(sPrefix + getString(R.string.policy)+"?"+query));
-                    String sPlayerPageURL = sPrefix+getString(R.string.playerPage),c=sPlayerPageURL+"?script=1";
-                    /*String script=String.format("<script>$(function(){\n" +
-                            "var o={};\n" +
-                            "var c=function(){\n" +
-                            "var p='#nav-panel',pa=$(p),ret=false;\n" +
-                            "if ( pa.length > 0 ){\n" +
-                            "  if ( pa.panel().panel('open')){\n" +
-                            "    $.getScript('%s');" +
-                            "    ret=true;\n" +
-                            "  }\n" +
-                            "}\n" +
-                            "  if ( ret && o.timer) {\n" +
-                            "   clearInterval(o.timer);\n" +
-                            "  }\n" +
-                            "}\n" +
-                            "o.timer=setInterval(c,1e3);\n" +
-                            "\n" +
-                            "})</script>",c);
-                    */
+
+
+            String policies="";
+            defaultCookie=l.getContent(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name));
+            String query = defaultCookie.replaceAll(";","&");
+            policies = l.getContent(sPrefix + getString(R.string.policy)+"?"+query);
+            oSitePolicy = new SitePolicy(policies);
+
+
+
+
+            final String sPlayerPageURL = sPrefix+getString(R.string.playerPage);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sPlayerPage = _l.getContent(sPlayerPageURL);
+                    String c="";
+                    String basehref=contentprovider;
+                    Pattern pa = Pattern.compile("(?:src|href)=\"([^\"]+\\.(?:js|css))");
+                    Matcher ma = pa.matcher(sPlayerPage);
+                    String content,match;
+
+                    while (ma.find()){
+                        match = ma.group(1);
+                        final String u=String.format("%s%s",sPrefix,match);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                _l.getContent(u);
+                            }
+                        }).start();
+                    }
+
+                    if (isConnected()){
+                        basehref=sPrefix;
+                        c=sPlayerPageURL+"?script=1";
+                    }
                     String script=String.format("<script>notyet=function(){" +
                             "$('#nav-panel').panel().panel('open');" +
                             "};$.getScript('%s');</script>",c);
-                    sPlayerPage = l.getContent(new URL(sPlayerPageURL));
-                    sPlayerPage = sPlayerPage
-                            .replace("<head>",String.format("<base href='%s'/><head>",sPrefix))
-                            .replace("</body>",script+"</body>")
-                            .replace("notyet()","")
-                            .replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>","");
-                    oSitePolicy = new SitePolicy(policies);
+
+                    if (!sPlayerPage.isEmpty()) {
+
+                        sPlayerPage = sPlayerPage
+                                .replace("<head>", String.format("<base href='%s'/><head>", basehref))
+                                .replace("</body>", script + "</body>")
+                                .replace("notyet()", "")
+                                .replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>", "");
+                    }
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            }).start();
+
+
             HOMEPAGE = sPrefix+getString(R.string.homepage);
             MENUPAGE = sPrefix+getString(R.string.menupage);
             Log.d("Async","finished:"+sSafeSite);
             return HOMEPAGE;
         }
+
+
         @Override
         protected void onPostExecute(String response) {
             if(response == null || exception) {
-                response = T("Something is not right, Please check if you have usable network connection?","连不上网络，请看看有没有网络信号？")+"<hr/>";
-                displayErrorPage(mWebView,response);
+                //response = T("Something is not right, Please check if you have usable network connection?","连不上网络，请看看有没有网络信号？")+"<hr/>";
+                //displayErrorPage(mWebView,response);
+                displayErrorPage(mWebView,"");
             }else {
                 Log.d("Async", "POSTED" + response);
                 mWebView.loadUrl(response);

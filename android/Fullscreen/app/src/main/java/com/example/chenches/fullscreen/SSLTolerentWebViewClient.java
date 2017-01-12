@@ -210,61 +210,6 @@ public class SSLTolerentWebViewClient extends WebViewClient {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        // intercept every call and modifying the header will be extemely slow :(
-        /*
-        try {
-            URL url = null;
-            Map<String, String> headers = new HashMap<>();
-
-            if ( u != null ) url = new URL(u);
-            else {
-                Log.d("Header request","here");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    url = new URL(request.getUrl().toString());
-                    headers = request.getRequestHeaders();
-                }
-            }
-            Log.d("Header sir:",String.format("Url:%s -> header:%s",url,headers));
-           if ( url == null) return null;
-            headerReWrite(url.toString(),headers);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            for (String key : headers.keySet()) {
-                connection.setRequestProperty(key, headers.get(key));
-            }
-            String type=connection.getContentType();
-            String enc=connection.getContentEncoding();
-            int code = connection.getResponseCode();
-            Log.d("TYPEENC C",String.format("%s",code));
-            if ( code != HttpURLConnection.HTTP_OK) {
-                return null;
-            }
-            if ( enc == null ) {
-                String deli="; ";
-                int pos=type.indexOf(deli);
-                if (pos > -1 ){
-                    enc=type.substring(pos+deli.length()).replace("charset=","");
-                    type=type.substring(0,pos);
-                }
-                if ( type == "text/html" && ( enc == null || enc == "")  ){
-                    enc = "UTF-8";
-                }
-            }
-            Log.d("TYPEENC",String.format("%s %s %s",url,type,enc));
-            return new WebResourceResponse(type,enc, connection.getInputStream());
-
-        } catch (java.net.SocketException e){
-            Log.d("Header socket error:",String.format("%s",e));
-        }catch(java.net.UnknownHostException e){
-            Log.d("Header host error:",String.format("%s",e));
-        }
-        catch( MalformedURLException e) {
-            Log.d("Header error:",String.format("%s",e));
-        } catch (IOException e) {
-            Log.d("IO Error:",String.format("%s",e));
-        } catch (Exception e){
-            Log.d("Unkonwn error:",String.format("%s",e));
-        }*/
         return null;
     }
 

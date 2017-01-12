@@ -27,5 +27,5 @@ dependencies {
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.google.android.gms:play-services-appindexing:9.8.0'
     compile files('libs/NativeXMonetizationSDK_v5.5.9.jar')
-
+    compile files('libs/mediationsdk-6.4.21.jar')
 }
