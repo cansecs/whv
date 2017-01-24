@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
@@ -26,8 +27,10 @@ import android.provider.Settings;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -106,12 +109,13 @@ public class FullscreenActivity extends AppCompatActivity {
     private static final String sSchemaSuffix = "://";
     private static final String RELOAD = "reload"+sSchemaSuffix; // RELOAD schema
     private static String sAppName;
-    private static String sDownloaddir;
+    protected static File sDownloaddir;
     private String sDownloadSchema; // webview page can call this schema to download and save url schema://filename/url
     private String sMenuSchema; // Schema on different menu action schema://action
     private static final boolean AUTO_HIDE = true;
     private static String UA;
     private static String sPlayerPage = "";
+    protected DownloadManager Downloader;
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -127,6 +131,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private static String originalUA;
     private static boolean MENUSHOWN = false;
     private final Handler mHideHandler = new Handler();
+    DownloadMerger oDownloadMerger;
 
     protected static List<Object> innerObjects = new ArrayList<>();
 
@@ -164,10 +169,11 @@ public class FullscreenActivity extends AppCompatActivity {
         @JavascriptInterface
         public void removeFile(String filename){
             File file = new File(filename);
+            Log.d("Removing",filename);
             file.delete();
         }
         private List<String> listFiles(){
-            ArrayList<String> lists=new ArrayList<String>();
+            /*ArrayList<String> lists=new ArrayList<String>();
             if (sDownloaddir ==null || sDownloaddir.isEmpty()) return lists;
             File direct = new File(sDownloaddir);
 
@@ -177,6 +183,30 @@ public class FullscreenActivity extends AppCompatActivity {
                     ArrayList<String> items = new ArrayList<>();
                     items.add(file.getAbsolutePath());
                     items.add(String.format("%s",file.lastModified()));
+                    lists.add(toJSONArr(items));
+                }
+            }
+            return lists;*/
+            ArrayList<String> lists=new ArrayList<String>();
+            if (oDownloadMerger != null){
+               Map<String,Object> filemaps = oDownloadMerger.scanFolder();
+                for (String name: filemaps.keySet()
+                     ) {
+
+                    File[] f=(File[]) filemaps.get(name);
+                    ArrayList<String> items = new ArrayList<>();
+                    items.add(name);
+                    items.add("0");
+                    long lm=0;
+                    for (int i = 0; i < f.length; i++) {
+                        File ff = f[i];
+                        if (ff != null){
+                            long _lm = ff.lastModified();
+                            if (_lm > lm) lm=_lm;
+                            items.add(ff.getAbsolutePath());
+                        }
+                    }
+                    items.set(1,String.format("%s",lm));
                     lists.add(toJSONArr(items));
                 }
             }
@@ -416,6 +446,7 @@ public class FullscreenActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             settings.setAllowFileAccess(true);
+            settings.setMediaPlaybackRequiresUserGesture(false);
             //settings.setAllowFileAccessFromFileURLs(true);
             //settings.setAllowUniversalAccessFromFileURLs(true);
         }
@@ -429,6 +460,7 @@ public class FullscreenActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setLoadWithOverviewMode(true);
+
         int mode = WebSettings.LOAD_DEFAULT;
         if (!isConnected()){
             mode=WebSettings.LOAD_CACHE_ELSE_NETWORK;
@@ -515,6 +547,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private boolean Download(String url) {
         String appName = sAppName;
         String schema = sDownloadSchema;
+        String cannot = T("Sorry cannot cache!","对不起，无法缓存！");
 
         int sl = schema.length();
         String filename;
@@ -534,30 +567,33 @@ public class FullscreenActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+
+
             try{
                 new URL(uRl);
             }catch(MalformedURLException e){
+                Tips(cannot);
                 Log.d("Bad url format",String.format("%s -> %s",uRl,e));
                 return false;
             }
         }
 
-        File direct = new File(sDownloaddir);
+        File direct = sDownloaddir, save = new File(sDownloaddir,filename);
 
         if (!direct.exists()) {
             boolean success=false;
             try {
                 success=direct.mkdirs();
             }catch(java.lang.IllegalStateException e){
-                Tips("_T('Cannot cache','无法缓存')");
+                Tips(cannot);
                 success=false;
             }
             if (!success) return !success;
         }
         Log.d("Save:",String.format("%s -> %s",filename,uRl));
-        DownloadManager mgr = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager mgr = Downloader;
 
-        Uri downloadUri = Uri.parse(uRl);
+        Uri downloadUri = Uri.parse(uRl),saveUri = Uri.parse(save.toURI().toString());
         DownloadManager.Request request = new DownloadManager.Request(
                 downloadUri);
         String cookie = mCookie.getCookie(uRl);
@@ -569,12 +605,14 @@ public class FullscreenActivity extends AppCompatActivity {
                 DownloadManager.Request.NETWORK_WIFI
                         | DownloadManager.Request.NETWORK_MOBILE)
                 .setAllowedOverRoaming(false).setTitle(desc)
+                .setVisibleInDownloadsUi(false)
                 .setDescription(desc)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir("/"+appName, filename);
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setDestinationUri(saveUri);
+                //.setDestinationInExternalPublicDir("/"+appName, filename);
 
         mgr.enqueue(request);
-        Tips(String.format("_T('Caching %s','缓存%s中')",filename,filename));
+        Tips(String.format(T("Caching %s","缓存%s中"),filename));
         return true;
     }
 
@@ -614,13 +652,16 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private void Tips(String tips){
-        String script = String.format("window._tipmsg && _tipmsg.display('%s')", tips);
+        /*String script = String.format("window._tipmsg && _tipmsg.display('%s')", tips);
         if ( oCurrentState.equals(PAGESTATE.SAFE)) {
             loadJScript(script);
         }else{
             showWebMenu();
             menuScript(script);
-        }
+        }*/
+        Toast toast = Toast.makeText(this,tips,Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP| Gravity.LEFT, 0, 0);
+        toast.show();
     }
 
     private void WebMenu(String action) {
@@ -1083,6 +1124,7 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Downloader = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         } // enable webview debug?
@@ -1107,7 +1149,13 @@ public class FullscreenActivity extends AppCompatActivity {
         /*Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);*/
         sAppName = getString(R.string.app_name).toLowerCase();
-        sDownloaddir = Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
+
+        sDownloaddir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),getString(R.string.app_desc));
+                //Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
+
+        oDownloadMerger =  new DownloadMerger(this);
+
+
         sDownloadSchema = sAppName + sSchemaSuffix;
         sMenuSchema = "menu"+sDownloadSchema;
 
@@ -1326,9 +1374,9 @@ public class FullscreenActivity extends AppCompatActivity {
                             try {
                                 URL u = new URL(url);
                                 String host = u.getHost();
-                                boolean matched = host.toLowerCase().matches(sSites);
+                                boolean matched = host.toLowerCase().matches(sSites) || !site.isEmpty();
                                 Log.d("Unhandled", String.format("%s->%s->%s", host, sSites, matched));
-                                if ( !site.isEmpty() || ( !sLastURL.isEmpty() && (origUrl.contains(sLastURL) || sLastURL.contains(origUrl)))) {
+                                if ( !script.isEmpty() || ( !sLastURL.isEmpty() && (origUrl.contains(sLastURL) || sLastURL.contains(origUrl)))) {
                                     Log.d("Unhandled loop", "true:"+origUrl+":"+sLastURL);
                                     sLastURL = origUrl;
                                     if ( matched){
@@ -1378,6 +1426,22 @@ public class FullscreenActivity extends AppCompatActivity {
                 Launch();
             }
         },new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Cursor c = Downloader.query((new DownloadManager.Query()).setFilterById(intent.getExtras().getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
+
+                if ( c.moveToFirst()){
+                    int state = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    String filename = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                    boolean completed = oDownloadMerger.downloadCompleted(filename);
+                    if(completed){
+                        Tips(filename+T(" downloaded","下载完毕"));
+                    }
+                }
+                Log.d("Here","download complete");
+            }
+        },new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         Launch();
         /*mWebView.post(new Runnable() {
             @Override
@@ -1517,7 +1581,7 @@ public class FullscreenActivity extends AppCompatActivity {
         /*mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);*/
         String title=mWebView.getTitle();
-        if ( title.matches("^(http(s)?|about).*$")){
+        if ( title.isEmpty() || title.matches("^(http(s)?|about).*$")){
             title = getString(R.string.app_desc);
         }
         if ( ! isConnected()){
