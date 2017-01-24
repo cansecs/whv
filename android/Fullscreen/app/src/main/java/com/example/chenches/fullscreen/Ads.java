@@ -33,7 +33,6 @@ public class Ads {
             String pp = activity.T("Purchase a plan","买个实惠");
             return toJSONArr(
                     nx.config("nativeX"),
-                    ss.config("ss"),
                     "{\"name\":\"" + pp +"\"}",
                     inapp.config("purchase")
             );
@@ -60,23 +59,17 @@ public class Ads {
         }
 
         @JavascriptInterface
-        public void ss(){
-            ss.run();
-        }
-        @JavascriptInterface
         public void purchase(){ // in-app purchase goes here
 
         }
 
     }
   nativeX nx;
-  supersonic ss;
     Inapp inapp;
   FullscreenActivity activity;
     public Ads(FullscreenActivity activity){
         this.activity = activity;
         nx = new nativeX(activity);
-        ss = new supersonic(activity);
         inapp = new Inapp(activity);
 
         activity.mWebView.addJavascriptInterface(new AdsObj(),"AppAds");
