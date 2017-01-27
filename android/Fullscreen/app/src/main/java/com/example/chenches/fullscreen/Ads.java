@@ -60,7 +60,7 @@ public class Ads {
 
         @JavascriptInterface
         public void purchase(){ // in-app purchase goes here
-
+            inapp.Postback("appid=1&revenue=mon1",null);
         }
 
     }

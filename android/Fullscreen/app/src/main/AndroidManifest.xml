@@ -35,21 +35,7 @@
             android:name="com.nativex.videoplayer.VideoActivity"
             android:configChanges="orientation|screenSize" />
 
-        <!-- Ironsrc ads -->
-        <activity
-            android:name="com.supersonicads.sdk.controller.ControllerActivity"
-            android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true" />
-        <activity
-            android:name="com.supersonicads.sdk.controller.InterstitialActivity"
-            android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true"
-            android:theme="@android:style/Theme.Translucent" />
-        <activity
-            android:name="com.supersonicads.sdk.controller.OpenUrlActivity"
-            android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true"
-            android:theme="@android:style/Theme.Translucent" />
+
 
 
         <activity

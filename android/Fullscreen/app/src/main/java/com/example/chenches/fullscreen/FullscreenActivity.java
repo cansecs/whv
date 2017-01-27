@@ -1214,7 +1214,7 @@ public class FullscreenActivity extends AppCompatActivity {
             @JavascriptInterface
             void nothing(){
             }
-        };
+        }
 
         //mWebView.addJavascriptInterface(new dumb(),"MediaSource");
         //mWebView.addJavascriptInterface(new dumb(),"webkitMediaSource");
@@ -1549,8 +1549,14 @@ public class FullscreenActivity extends AppCompatActivity {
         System.exit(0);
     }
 
+
     private void hide() {
-        if ( rotated() ) {
+        hide(rotated());
+    }
+
+    private void hide(boolean force){
+
+        if ( force ) {
             // Hide UI first
             hideSystemBar();
             mControlsView.setVisibility(View.GONE);

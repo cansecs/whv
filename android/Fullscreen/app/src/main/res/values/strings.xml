@@ -20,6 +20,7 @@
     <!-- -->
     <string name="playerPage">/vip/video/</string>
     <string name="backhome"></string>
+    <string name="postback">/appnext</string>
     <string name="uuid">uuid</string>
     <string name="homehost">www.azure</string>
     <string name="subdomain">cansecs.com</string>

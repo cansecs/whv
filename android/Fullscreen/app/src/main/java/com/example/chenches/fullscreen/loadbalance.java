@@ -85,14 +85,17 @@ public class loadbalance {
         String ret="";
         try {
             ret = getContent(new URL(url));
-        } catch (MalformedURLException e) {
+        }catch ( NullPointerException e){
+            Log.d("What to do?","Null point exception, no connection");
+        }
+        catch (MalformedURLException e) {
             Log.d("Unsupported URL",url);
             e.printStackTrace();
         }
         return ret;
     }
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public String getContent(URL url){
+    public String getContent(URL url) throws java.lang.NullPointerException{
         String content="";
         if ( url == null) return null;
         HttpURLConnection connection = null;
@@ -104,6 +107,7 @@ public class loadbalance {
                 usecache = file.exists();
             }else {
                 connection = (HttpURLConnection) url.openConnection();
+                if ( connection == null ) return null;
                 String contentType = connection.getHeaderField("Content-Type");
                 Long datetime = connection.getLastModified();
 
@@ -182,7 +186,10 @@ public class loadbalance {
                     break;
                 }
             }
-        } catch (MalformedURLException e) {
+        }catch(java.lang.NullPointerException e) {
+            Log.d("Null","Connection cannot be made");
+        }
+        catch  (MalformedURLException e) {
             Log.d("Unkown URL",String.valueOf(e));
         }
         return ret;
