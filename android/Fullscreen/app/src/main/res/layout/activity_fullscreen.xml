@@ -57,17 +57,17 @@
             android:layout_gravity="start|center_vertical"
             android:visibility="invisible" />
 
-        <LinearLayout
+        <!-- <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="?metaButtonBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom|center_horizontal"
             android:background="@color/black_overlay"
             android:orientation="horizontal"
             tools:ignore="UselessParent">
 
-        </LinearLayout>
+        </LinearLayout> -->
 
     </FrameLayout>
 

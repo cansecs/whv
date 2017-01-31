@@ -301,16 +301,16 @@ public class FullscreenActivity extends AppCompatActivity {
     protected String sPrefix = null; // Site prefix we are supposed to visit
     private String sSafeSite = null;
     private GestureDetector mGestureDetector;
-    private View mControlsView;
+    //private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
             // Delayed display of UI elements
             hideSystemBar(false);
-            mControlsView.setVisibility(View.VISIBLE);
+            //mControlsView.setVisibility(View.VISIBLE);
         }
     };
-    private ProgressDialog progressBar;
+    //private ProgressDialog progressBar;
     private boolean mVisible;
     /*class JSI {
         private Context ctx;
@@ -377,11 +377,11 @@ public class FullscreenActivity extends AppCompatActivity {
 
         @Override
         public void onProgressChanged(WebView view, int newProgress){
-            //progressBar.show();
+          /*  //progressBar.show();
             progressBar.setMessage(String.format("%d%%...", newProgress));
-            progressBar.setProgress(newProgress);
+            progressBar.setProgress(newProgress);*/
             if (newProgress == 100 ){
-                progressBar.hide();
+                //progressBar.hide();
                 feedMenu(view.getUrl());
             }
 
@@ -1160,12 +1160,12 @@ public class FullscreenActivity extends AppCompatActivity {
         sMenuSchema = "menu"+sDownloadSchema;
 
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        /*mControlsView = findViewById(R.id.fullscreen_content_controls);
         progressBar = new ProgressDialog(mControlsView.getContext());
         //progressBar.getWindow().setGravity(Gravity.BOTTOM);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressBar.setProgress(0);
-        progressBar.setMax(100);
+        progressBar.setMax(100);*/
         //mContentView = findViewById(R.id.fullscreen_content);
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -1551,20 +1551,20 @@ public class FullscreenActivity extends AppCompatActivity {
 
 
     private void hide() {
-        hide(rotated());
+        hide(rotated(),UI_ANIMATION_DELAY);
     }
 
-    private void hide(boolean force){
+    private void hide(boolean force,int delay){
 
         if ( force ) {
             // Hide UI first
             hideSystemBar();
-            mControlsView.setVisibility(View.GONE);
+            //mControlsView.setVisibility(View.GONE);
             mVisible = false;
 
             // Schedule a runnable to remove the status and navigation bar after a delay
             mHideHandler.removeCallbacks(mShowPart2Runnable);
-            mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+            mHideHandler.postDelayed(mHidePart2Runnable, delay);
         }
     }
 
@@ -1578,11 +1578,22 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig){
         super.onConfigurationChanged(newConfig);
-        show();
+        boolean rotated=rotated();
+        if ( rotated) {
+            show(rotated);
+        }else{
+            //show(true);
+            //hide(true,0);
+            show(false);
+        }
+    }
+
+    private void show(){
+        show(rotated());
     }
 
     @SuppressLint("InlinedApi")
-    private void show() {
+    private void show(boolean rotated) {
         // Show the system bar
         /*mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);*/
@@ -1594,28 +1605,18 @@ public class FullscreenActivity extends AppCompatActivity {
             title += T("(Offline)","(离线)");
         }
         setTitle(title);
-        hideSystemBar(false);
-        int value;
-        if ( rotated()) {
-            value=View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    |View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    ;
+        hideSystemBar(rotated);
+        fullscreen(mWebView);
+        if ( rotated) {
+            if (AUTO_HIDE) {
+                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+            }
+            // Schedule a runnable to display UI elements after a delay
+            mHideHandler.removeCallbacks(mHidePart2Runnable);
+            mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
 
-        }else {
-            value = View.SYSTEM_UI_FLAG_VISIBLE
-          //|View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    |View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    ;
         }
-        mWebView.setSystemUiVisibility(value);
         mVisible = true;
-        if (AUTO_HIDE) {
-            delayedHide(AUTO_HIDE_DELAY_MILLIS);
-        }
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
 
     }
 
