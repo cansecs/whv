@@ -61,6 +61,7 @@ public class SitePolicy {
     public Map<String,Object> map = new HashMap<>();
     public Map<String,String> submap = new HashMap<>();
     public String getKey(String url,boolean return_site) {
+        if ( url == null ) return null;
         if (map.containsKey(url)) {
             return url;
         }
@@ -80,6 +81,7 @@ public class SitePolicy {
         return key;
     }
     public Policy getPolicy(String url){
+        if ( url == null ) return null;
         return (Policy)map.get(getKey(url,false));
     }
     public String getUA(String key){

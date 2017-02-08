@@ -16,6 +16,7 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -71,12 +73,14 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Inet4Address;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -116,6 +120,8 @@ public class FullscreenActivity extends AppCompatActivity {
     private static String UA;
     private static String sPlayerPage = "";
     protected DownloadManager Downloader;
+    private localStreamer streamer = null;
+    private int streamerPort = 11013;
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -157,6 +163,30 @@ public class FullscreenActivity extends AppCompatActivity {
             return String.format(ret,inside);
         }
         @JavascriptInterface
+        public void stopStreamer(){
+            if (streamer != null ){
+                if (streamer.isRunning()) streamer.stop();
+            }
+        }
+
+        @JavascriptInterface
+        public String getStreamerURL(){
+            String ret="";
+            if ( streamer != null){
+             if (!streamer.isRunning()){
+                 startStreamer();
+             }
+                ret=streamer.getUrl();
+            }
+            return ret;
+        }
+
+        /*@JavascriptInterface
+        public void callmenu(String value){
+            menuScript(value);
+        }*/
+
+        @JavascriptInterface
         public String visits() {
             return toJSONArr(oHistories);
         }
@@ -173,21 +203,8 @@ public class FullscreenActivity extends AppCompatActivity {
             file.delete();
         }
         private List<String> listFiles(){
-            /*ArrayList<String> lists=new ArrayList<String>();
-            if (sDownloaddir ==null || sDownloaddir.isEmpty()) return lists;
-            File direct = new File(sDownloaddir);
-
-            if (direct.exists()) {
-                File [] files = direct.listFiles();
-                for (File file : files) {
-                    ArrayList<String> items = new ArrayList<>();
-                    items.add(file.getAbsolutePath());
-                    items.add(String.format("%s",file.lastModified()));
-                    lists.add(toJSONArr(items));
-                }
-            }
-            return lists;*/
             ArrayList<String> lists=new ArrayList<String>();
+            String lu=this.getStreamerURL();
             if (oDownloadMerger != null){
                Map<String,Object> filemaps = oDownloadMerger.scanFolder();
                 for (String name: filemaps.keySet()
@@ -454,7 +471,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         settings.setSupportMultipleWindows(false);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
-        settings.setSupportZoom(false);
+        settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
         settings.setUseWideViewPort(true);
         settings.setDomStorageEnabled(true);
@@ -605,7 +622,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 DownloadManager.Request.NETWORK_WIFI
                         | DownloadManager.Request.NETWORK_MOBILE)
                 .setAllowedOverRoaming(false).setTitle(desc)
-                .setVisibleInDownloadsUi(false)
+                .setVisibleInDownloadsUi(true)
                 .setDescription(desc)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(saveUri);
@@ -660,7 +677,7 @@ public class FullscreenActivity extends AppCompatActivity {
             menuScript(script);
         }*/
         Toast toast = Toast.makeText(this,tips,Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP| Gravity.LEFT, 0, 0);
+        toast.setGravity(Gravity.BOTTOM| Gravity.LEFT, 0, 0);
         toast.show();
     }
 
@@ -727,36 +744,47 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
-    protected void call(List<Object> objects, String method){
+    @Override
+    protected void onRestoreInstanceState (Bundle savedInstanceState){
+        callAll("onRestoreInstanceState",savedInstanceState);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    protected void call(List<Object> objects, String method, Bundle... args){
         Method methodobj = null;
+        String name="Unkownn";
         for (Object obj:objects
              ) {
             try {
-                methodobj = obj.getClass().getMethod(method);
+                Class oc=obj.getClass();
+                name = oc.getName();
+                methodobj = oc.getMethod(method);
             } catch (NoSuchMethodException|SecurityException e) {
-                e.printStackTrace();
+                Log.d("Unsupported Methd",String.format("Object:%s doesn't have method:%s, ignoring",name,method));
             }
             try{
                 if ( methodobj != null ) {
-                    methodobj.invoke(obj);
+                    if ( args.length > 0) {
+                        Bundle[] bs = Arrays.copyOfRange(args, 0, args.length);
+                        methodobj.invoke(obj,(Object)bs);
+                    }else{
+                        methodobj.invoke(obj);
+                    }
                 }
             }catch(IllegalArgumentException|IllegalAccessException|InvocationTargetException e){
-                e.printStackTrace();
+               Log.d("Illegal call",name);
             }
 
         }
     }
 
-    protected void callAll(String method){
-        call(innerObjects,method);
+    protected void callAll(String method,Bundle... args){
+        call(innerObjects,method,args);
     }
     @Override
     protected void onPause() {
         super.onPause();    //To change body of overridden methods use File | Settings | File Templates.
         callAll("onPause");
-        //mWebView.onPause();
-        //mMenuView.onPause();
-
     }
 
     private void _loadScript(String script,WebView view){
@@ -1120,10 +1148,16 @@ public class FullscreenActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle state){
+        super.onSaveInstanceState(state);
+        callAll("onSaveInstanceState",state);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        callAll("onCreate",savedInstanceState);
         Downloader = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
@@ -1151,6 +1185,7 @@ public class FullscreenActivity extends AppCompatActivity {
         sAppName = getString(R.string.app_name).toLowerCase();
 
         sDownloaddir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),getString(R.string.app_desc));
+        streamer = new localStreamer(sDownloaddir.getAbsolutePath()); // initiate a stream to handle remote call to get local content
                 //Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
 
         oDownloadMerger =  new DownloadMerger(this);
@@ -1200,7 +1235,7 @@ public class FullscreenActivity extends AppCompatActivity {
             public void errorHandling(WebView view,int errorCode, String description, String failingUrl) {
                 super.errorHandling(view,errorCode,description,failingUrl);
                 if ( ! view.getUrl().startsWith("data:")) {
-                    displayErrorPage(view, String.format("<a href='%s'>", JSObj + "._closeall()") + T("Please close this APP completedly, check your netork and reopen it again!", "请关闭APP，检查网络，确定网络正常在重新启动这个APP试试看") + "</a>");
+                    displayErrorPage(view, String.format("<a href='%s'>", JSObj + "._closeall()") + T("Please close this APP completedly, check your netork and reopen it again!", "请关闭APP，检查网络，确定网络正常重新启动这个APP试试看") + "</a>");
                 }
             }
         });
@@ -1346,6 +1381,8 @@ public class FullscreenActivity extends AppCompatActivity {
                             Log.d("Contenthandler",url);
                             url=url.replace(contentprovider,sPrefix+"/");
                             return true;
+                        }else if(url.startsWith("about:")){
+                            return false;
                         }
                         else if ( url.startsWith(RELOAD)) { // server error, try to relocate the server URL
                             Launch();
@@ -1416,6 +1453,67 @@ public class FullscreenActivity extends AppCompatActivity {
         );
         // Here, we use #mWebChromeClient with implementation for handling PermissionRequests.
         mWebView.setWebChromeClient(mWebChromeClient);
+        Android_Gesture_Detector android_gesture_detector = new Android_Gesture_Detector() {
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+                //showWebMenu();
+                Log.d("Longpressed",String.format("%s",e));
+                show(false);
+
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+                //showWebMenu();
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float vX, float vY) {
+                float y1 = e1.getY(),y2=e2.getY(), x1=e1.getX(),x2=e2.getX();
+                Log.d("Fling",String.format("%s %s %s %s %s %s",x1,y1,x2,y2,vX,vY));
+                if (vY < -5000 && Math.abs(vX) < 1500){ // fling up
+                    show();
+                }
+                if ( y1 < 100 & y2 < 100 && vX > 100  ){ //fling right
+                    showWebMenu();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                float y1 = e1.getY(),y2=e2.getY(), x1=e1.getX(),x2=e2.getX();
+                Log.d("Location",String.format("%s %s %s %s %s %s",x1,x2,y1,y2,distanceX,distanceY));
+                /*if (e1.getY() < e2.getY()) {
+                    Log.d("Gesture ", " Scroll Down");
+                }
+                if ( distanceX < -50 && Math.abs(distanceX) < 5){
+                    // showWebMenu();
+                }
+                if (distanceY < -50) {
+                    show(true);
+                }*/
+                show(false);
+                return false;
+            }
+        };
+// Create a GestureDetector
+        mGestureDetector = new GestureDetector(this, android_gesture_detector);
+        mGestureDetector.setIsLongpressEnabled(true);
+
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+
+            public boolean onTouch(View view, MotionEvent event) {
+                mGestureDetector.onTouchEvent(event);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mGestureDetector.onGenericMotionEvent(event);
+                }
+
+                return view.onTouchEvent(event);
+            }
+        });
         configureWebSettings(mWebView.getSettings());
 
         configureWebSettings(mMenuView.getSettings());
@@ -1452,59 +1550,7 @@ public class FullscreenActivity extends AppCompatActivity {
             }
         });*/
 
-        Android_Gesture_Detector android_gesture_detector = new Android_Gesture_Detector() {
-            @Override
-            public void onLongPress(MotionEvent e) {
 
-                //showWebMenu();
-
-            }
-
-            @Override
-            public void onShowPress(MotionEvent e) {
-
-                //showWebMenu();
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float vX, float vY) {
-                float y1 = e1.getY(),y2=e2.getY(), x1=e1.getX(),x2=e2.getX();
-                Log.d("Fling",String.format("%s %s %s %s %s %s",x1,y1,x2,y2,vX,vY));
-                if (vY < -5000 && Math.abs(vX) < 1500){ // fling up
-                    // show();
-                }
-                if ( y1 < 100 & y2 < 100 && vX > 100  ){ //fling right
-                    showWebMenu();
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                float y1 = e1.getY(),y2=e2.getY(), x1=e1.getX(),x2=e2.getX();
-                Log.d("Location",String.format("%s %s %s %s %s %s",x1,x2,y1,y2,distanceX,distanceY));
-                if (e1.getY() < e2.getY()) {
-                    Log.d("Gesture ", " Scroll Down");
-                }
-                if ( distanceX < -50 && Math.abs(distanceX) < 5){
-                    // showWebMenu();
-                }
-                if (distanceY < -50) {
-                    show();
-                }
-                return false;
-            }
-        };
-// Create a GestureDetector
-        mGestureDetector = new GestureDetector(this, android_gesture_detector);
-
-        mWebView.setOnTouchListener(new View.OnTouchListener() {
-
-            public boolean onTouch(View view, MotionEvent event) {
-                mGestureDetector.onTouchEvent(event);
-                return mWebView.onTouchEvent(event);
-            }
-        });
         mTargetView = (FrameLayout)findViewById(R.id.target_view);
         mContentView = (FrameLayout) findViewById(R.id.main_content);
         // Upon interacting with UI controls, delay any scheduled hide()
@@ -1520,6 +1566,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         innerObjects.add(mMenuView);
         innerObjects.add(mWebView);
+        innerObjects.add(streamer);
 
         ads = new Ads(this);
         // Ads setup ends
@@ -1605,17 +1652,15 @@ public class FullscreenActivity extends AppCompatActivity {
             title += T("(Offline)","(离线)");
         }
         setTitle(title);
-        hideSystemBar(rotated);
         fullscreen(mWebView);
-        if ( rotated) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            // Schedule a runnable to display UI elements after a delay
-            mHideHandler.removeCallbacks(mHidePart2Runnable);
-            mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-
+        hideSystemBar(false);
+        if (AUTO_HIDE) {
+            delayedHide(AUTO_HIDE_DELAY_MILLIS);
         }
+        // Schedule a runnable to display UI elements after a delay
+        mHideHandler.removeCallbacks(mHidePart2Runnable);
+        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+
         mVisible = true;
 
     }
@@ -1641,8 +1686,23 @@ public class FullscreenActivity extends AppCompatActivity {
                 }
                 ws.setCacheMode(v);*/
                 mWebView.loadDataWithBaseURL(HOMEPAGE, sPlayerPage, "text/html", "UTF-8", null);
+                startStreamer();
             }
         });
+    }
+
+    private void startStreamer(){
+        if (isConnected()){
+            WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+            if ( wm.getWifiState() == WifiManager.WIFI_STATE_ENABLED ) {
+                wm.getConnectionInfo().getIpAddress();
+                String deviceIp = Formatter.formatIpAddress(wm.getConnectionInfo()
+                        .getIpAddress());
+                Log.d("WIFI:", deviceIp);
+                streamer.start(deviceIp,streamerPort);
+            }
+        }
+
     }
 
     @Override
@@ -1773,7 +1833,7 @@ public class FullscreenActivity extends AppCompatActivity {
                         sPlayerPage = sPlayerPage
                                 .replace("<head>", String.format("<base href='%s'/><head>", basehref))
                                 .replace("</body>", script + "</body>")
-                                .replace("notyet()", "")
+                                .replace("notyet()", "$(window).on('unload',function(){window.SNIFFER && SNIFFER.stopStreamer();})")
                                 .replaceAll("<a[^>]*?icon-refresh\"[^>]*>.*?</a>", "");
                     }
                 }
