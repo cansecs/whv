@@ -123,6 +123,7 @@ public class FullscreenActivity extends AppCompatActivity {
     private localStreamer streamer = null;
     private int streamerPort = 11013;
 
+    private String pHeaderPattern = "";
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
@@ -1353,10 +1354,13 @@ public class FullscreenActivity extends AppCompatActivity {
                         if ( url != null ) {
                             String host = url.getHost(), path = url.getPath();
                             intercept = ( ! host.contains(getString(R.string.subdomain))) && (
-                                    (( /*url.getProtocol().compareToIgnoreCase("http") == 0 &&*/ host.compareToIgnoreCase("ubercpm.com") == 0) && path.endsWith("show.php"))
+                                    (pHeaderPattern.isEmpty() || url.toString().matches(pHeaderPattern) )
+                                            /*||
+                                    (( url.getProtocol().compareToIgnoreCase("http") == 0 && host.compareToIgnoreCase("ubercpm.com") == 0) && path.endsWith("show.php"))
                                             || path.endsWith("get.json")
-                                            || path.endsWith("api/modules/api")
+                                            || path.endsWith("api/modules/api") */
                             );
+
 
                         }
                         return intercept || super.needCustomHeader(url);
@@ -1787,14 +1791,34 @@ public class FullscreenActivity extends AppCompatActivity {
             sSafeSite=candidate.replaceAll("(^.*?)(\\w+\\.\\w+$)","$2"); // e.g our main site containing subdomain
             sPrefix= proto+candidate;
 
+            String control = _l.getContent(sPrefix+"/js/control.js");
+            Log.d("Control",control);
+            Pattern pa=Pattern.compile("\"([^\"]+)\"\\s*:\"([^\"]+)\"");
+            if ( control != null && !control.isEmpty()){
+                Matcher ma = pa.matcher(control);
+                while ( ma.find()){
+                    String name=ma.group(1);
+                    if (name == null ) continue;
+                    String value=ma.group(2);
+                    if ( name.equals("blacklist")){
+                        SSLTolerentWebViewClient.blockURL = value;
+                    }else if ( name.equals("customheader")){
+                        pHeaderPattern = value;
+                    }
 
-            String policies="";
-            defaultCookie=l.getContent(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name));
-            String query = defaultCookie.replaceAll(";","&");
-            policies = l.getContent(sPrefix + getString(R.string.policy)+"?"+query);
-            oSitePolicy = new SitePolicy(policies);
+                }
+            }
 
-
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String policies="";
+                    defaultCookie=_l.getContent(sPrefix + getString(R.string.cookiepage)+"?app="+getString(R.string.app_name));
+                    String query = defaultCookie.replaceAll(";","&");
+                    policies = _l.getContent(sPrefix + getString(R.string.policy)+"?"+query);
+                    oSitePolicy = new SitePolicy(policies);
+                }
+            });
 
 
             final String sPlayerPageURL = sPrefix+getString(R.string.playerPage);

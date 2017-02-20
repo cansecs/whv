@@ -37,6 +37,7 @@ public class SSLTolerentWebViewClient extends WebViewClient {
     private boolean addReferer = true;
     protected String lastURL = null;
     protected boolean oldversion = false;
+    static String blockURL = ""; // a pattrn to block unwanted URL
     protected Map<String, String> defaultHeaders = new HashMap<>();
     @Override
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
@@ -233,6 +234,11 @@ public class SSLTolerentWebViewClient extends WebViewClient {
         }
     }
     public boolean unknownURLHandler(WebView view,String url){
+        if ( blockURL != null && !blockURL.isEmpty()){
+            if ( url.matches(blockURL)){
+                return true;
+            }
+        }
         try {
             Log.d("Unknown:", url);
             Intent intent = new Intent(Intent.ACTION_VIEW);
