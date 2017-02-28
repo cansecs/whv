@@ -59,6 +59,7 @@ public class PointState {
         long points=0;
         if (expire != null ) {
             points=expire.getTime()-new Date().getTime();
+            if ( points < 0 ) points = 0;
         }
         return points;
     }
