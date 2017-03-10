@@ -5,6 +5,7 @@
     android:background="#0099cc"
     android:paddingBottom="0px"
     android:paddingTop="0px"
+    android:id="@+id/whole"
     tools:context="com.example.chenches.fullscreen.FullscreenActivity"
     android:clickable="false">
 
@@ -36,7 +37,8 @@
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+
+        >
 
         <WebView
             android:layout_width="match_parent"
@@ -44,6 +46,7 @@
             android:id="@+id/webView"
             android:gravity="center"
             android:keepScreenOn="false"
+
             android:layout_gravity="start|center_vertical"
             style="@android:style/Widget.WebView" />
 

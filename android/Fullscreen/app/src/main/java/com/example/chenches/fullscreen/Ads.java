@@ -32,9 +32,9 @@ public class Ads {
         public String config() {
             String pp = activity.T("Purchase a plan","买个实惠");
             return toJSONArr(
-                    nx.config("nativeX"),
-                    "{\"name\":\"" + pp +"\"}",
-                    inapp.config("purchase")
+                    nx.config("nativeX")
+                    ,"{\"name\":\"" + pp +"\"}"
+                    //,inapp.config("purchase")
             );
             /*String desc=activity.T(join("Fast and easy, have a fair amount of choices",
                     "Only can credit you one point or less a time. Need to read about the instruction before your action"),

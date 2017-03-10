@@ -17,7 +17,7 @@
         android:label="@string/app_desc"
         android:hardwareAccelerated="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
 
         <!-- proider for offline download video -->
         <provider

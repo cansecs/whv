@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.Settings;
+import android.support.v4.view.WindowCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Formatter;
@@ -304,11 +305,7 @@ public class FullscreenActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Delayed removal of status and navigation bar
-            fullscreen(mWebView);
-            fullscreen(mMenuView);
-            if (mCustomView !=null ) {
-                fullscreen(mCustomView);
-            }
+            fullscreen(true);
         }
     };
     private CookieManager mCookie;
@@ -324,7 +321,7 @@ public class FullscreenActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Delayed display of UI elements
-            hideSystemBar(false);
+            fullscreen(false);
             //mControlsView.setVisibility(View.VISIBLE);
         }
     };
@@ -495,53 +492,76 @@ public class FullscreenActivity extends AppCompatActivity {
         changeUA(settings,null);
     }
 
-    //private View mContentView;
-    @SuppressLint("InlineApi")
-    private void fullscreen(View view){
-       /* view.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                //View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_IMMERSIVE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        */
-        int value;
-        boolean isRotated=rotated();
-        if ( isRotated) {
-            value=View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    |View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                       ;
 
-        }else{
-            value = 0; /*View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    |View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    |View.SYSTEM_UI_FLAG_FULLSCREEN
-                    |View.SYSTEM_UI_FLAG_VISIBLE;*/
-
-        }
-        hideSystemBar(isRotated);
-        view.setSystemUiVisibility(value);
-
-        return;
-    }
-    private void hideSystemBar(boolean value){
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            if(value ) {
-                actionBar.hide();
-            }else{
-                actionBar.show();
+    private void fullscreen(boolean enter){
+        View [] views = { null,
+                //mContentView
+                //,mWebView
+                //, mMenuView
+                getWindow().getDecorView()
+        };
+        for (int i = 0; i < views.length; i++) {
+            if ( views[i] != null ){
+                hideSystemBar(enter,views[i]);
             }
         }
-
     }
-    private void hideSystemBar(){
-        hideSystemBar(true);
+    private void hideSystemBar(boolean isRotated,View view){
+        if ( view == null ){
+            view = getWindow().getDecorView();
+        }
+        if ( ! view.isShown() ){
+            return;
+        }
+        int value = view.getSystemUiVisibility();
+
+        //mContentView.setFitsSystemWindows(false);
+        android.app.ActionBar ab = getActionBar();
+        ActionBar ab2 = getSupportActionBar();
+
+        if ( isRotated) {
+            value=
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+            ;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                value = value
+                     //   | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE
+                ;
+            }
+            //getActionBar().hide();
+        }else{
+            value &= ~View.SYSTEM_UI_FLAG_FULLSCREEN
+                    //|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            ;
+            //getActionBar().show();
+           /* if ( ab2 != null && !ab2.isShowing()){
+                ab2.show();
+            }else {
+                if (ab != null && !ab.isShowing()) {
+                    ab.show();
+                }
+            }
+            */
+        }
+        //Log.d("Setting view",String.format("%s",value));
+        //view.getRootView().setFitsSystemWindows(!isRotated);
+        int topp=0;
+        if (!isRotated){
+            topp=paddingDp;
+        }
+        View otherview = mWebView;
+        if (mMenuView.isShown()){
+            otherview = mMenuView;
+        }
+        otherview.setPadding(0,topp,0,topp);
+        view.setSystemUiVisibility(value);
+        //view.invalidate();
+
     }
 
     private boolean isEnglish(){
@@ -801,6 +821,7 @@ public class FullscreenActivity extends AppCompatActivity {
     }
     protected void loadMenuPage(){
         String url = mWebView.getUrl();
+        if ( url == null ) return;
         String suburl=url.replaceAll("^(https://.*?)(http(?:s)?://.*)$","$2");
         if (!(currentSite == null || currentSite.isEmpty())) suburl=currentSite;
         String site = oSitePolicy.getKey(suburl,true);
@@ -1158,10 +1179,28 @@ public class FullscreenActivity extends AppCompatActivity {
         callAll("onSaveInstanceState",state);
     }
 
+    int paddingDp = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(WindowCompat.FEATURE_ACTION_BAR_OVERLAY);
         super.onCreate(savedInstanceState);
         callAll("onCreate",savedInstanceState);
+        int paddingPixel = 25;
+        float density = getResources().getDisplayMetrics().density;
+        paddingDp = (int)(paddingPixel * density);
+        final View view =
+        getWindow().getDecorView();
+        view.setFitsSystemWindows(false);
+        view.setOnSystemUiVisibilityChangeListener(
+                (new View.OnSystemUiVisibilityChangeListener(){
+                  @Override
+                    public void onSystemUiVisibilityChange(int visibility){
+                     // fullscreen(false);
+                      //getWindow().getDecorView().setPadding(0,paddingDp,0,0);
+                  }
+                })
+        );
+        fullscreen(rotated());
         Downloader = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
@@ -1184,6 +1223,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
         //actionBar.setHomeAsUpIndicator();
         setContentView(R.layout.activity_fullscreen);
+
+
         /*Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);*/
         sAppName = getString(R.string.app_name).toLowerCase();
@@ -1612,7 +1653,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         if ( force ) {
             // Hide UI first
-            hideSystemBar();
+            //fullscreen(false);
             //mControlsView.setVisibility(View.GONE);
             mVisible = false;
 
@@ -1623,7 +1664,8 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private boolean rotated(){
-        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+        return true; // always return true to make it always full screen
+        //return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
         /*Display display = ((WindowManager) this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int rotation = display.getRotation();
         return ( rotation == Surface.ROTATION_90 ) || ( rotation == Surface.ROTATION_270);*/
@@ -1632,21 +1674,14 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig){
         super.onConfigurationChanged(newConfig);
-        boolean rotated=rotated();
-        if ( rotated) {
-            show(rotated);
-        }else{
-            //show(true);
-            //hide(true,0);
-            show(false);
-        }
+        show(rotated());
     }
 
     private void show(){
         show(rotated());
     }
 
-    @SuppressLint("InlinedApi")
+
     private void show(boolean rotated) {
         // Show the system bar
         /*mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -1659,15 +1694,15 @@ public class FullscreenActivity extends AppCompatActivity {
             title += T("(Offline)","(离线)");
         }
         setTitle(title);
-        fullscreen(mWebView);
-        hideSystemBar(false);
-        if (AUTO_HIDE) {
-            delayedHide(AUTO_HIDE_DELAY_MILLIS);
+        fullscreen(false);
+       if ( rotated ) {
+            if (AUTO_HIDE) {
+                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+            }
+            // Schedule a runnable to display UI elements after a delay
+            //mHideHandler.removeCallbacks(mHidePart2Runnable);
+            //mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
         }
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-
         mVisible = true;
 
     }
