@@ -175,9 +175,9 @@ public class FullscreenActivity extends AppCompatActivity {
         public String getStreamerURL(){
             String ret="";
             if ( streamer != null){
-             if (!streamer.isRunning()){
-                 startStreamer();
-             }
+                if (!streamer.isRunning()){
+                    startStreamer();
+                }
                 ret=streamer.getUrl();
             }
             return ret;
@@ -208,9 +208,9 @@ public class FullscreenActivity extends AppCompatActivity {
             ArrayList<String> lists=new ArrayList<String>();
             String lu=this.getStreamerURL();
             if (oDownloadMerger != null){
-               Map<String,Object> filemaps = oDownloadMerger.scanFolder();
+                Map<String,Object> filemaps = oDownloadMerger.scanFolder();
                 for (String name: filemaps.keySet()
-                     ) {
+                        ) {
 
                     File[] f=(File[]) filemaps.get(name);
                     ArrayList<String> items = new ArrayList<>();
@@ -522,21 +522,21 @@ public class FullscreenActivity extends AppCompatActivity {
         if ( isRotated) {
             value=
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_FULLSCREEN
             ;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 value = value
-                     //   | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        //   | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         | View.SYSTEM_UI_FLAG_IMMERSIVE
                 ;
             }
             //getActionBar().hide();
         }else{
             value &= ~View.SYSTEM_UI_FLAG_FULLSCREEN
-                    //|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            //|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             ;
             //getActionBar().show();
            /* if ( ab2 != null && !ab2.isShowing()){
@@ -550,7 +550,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
         //Log.d("Setting view",String.format("%s",value));
         //view.getRootView().setFitsSystemWindows(!isRotated);
-        int topp=0;
+        /*int topp=0;
         if (!isRotated){
             topp=paddingDp;
         }
@@ -558,7 +558,7 @@ public class FullscreenActivity extends AppCompatActivity {
         if (mMenuView.isShown()){
             otherview = mMenuView;
         }
-        otherview.setPadding(0,topp,0,topp);
+        otherview.setPadding(0,topp,0,topp);*/
         view.setSystemUiVisibility(value);
         //view.invalidate();
 
@@ -650,7 +650,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 .setDescription(desc)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
                 .setDestinationUri(saveUri);
-                //.setDestinationInExternalPublicDir("/"+appName, filename);
+        //.setDestinationInExternalPublicDir("/"+appName, filename);
 
         mgr.enqueue(request);
         Tips(String.format(T("Caching %s","缓存%s中"),filename));
@@ -778,7 +778,7 @@ public class FullscreenActivity extends AppCompatActivity {
         Method methodobj = null;
         String name="Unkownn";
         for (Object obj:objects
-             ) {
+                ) {
             try {
                 Class oc=obj.getClass();
                 name = oc.getName();
@@ -796,7 +796,7 @@ public class FullscreenActivity extends AppCompatActivity {
                     }
                 }
             }catch(IllegalArgumentException|IllegalAccessException|InvocationTargetException e){
-               Log.d("Illegal call",name);
+                Log.d("Illegal call",name);
             }
 
         }
@@ -1189,15 +1189,15 @@ public class FullscreenActivity extends AppCompatActivity {
         float density = getResources().getDisplayMetrics().density;
         paddingDp = (int)(paddingPixel * density);
         final View view =
-        getWindow().getDecorView();
+                getWindow().getDecorView();
         view.setFitsSystemWindows(false);
         view.setOnSystemUiVisibilityChangeListener(
                 (new View.OnSystemUiVisibilityChangeListener(){
-                  @Override
+                    @Override
                     public void onSystemUiVisibilityChange(int visibility){
-                     // fullscreen(false);
-                      //getWindow().getDecorView().setPadding(0,paddingDp,0,0);
-                  }
+                        // fullscreen(false);
+                        //getWindow().getDecorView().setPadding(0,paddingDp,0,0);
+                    }
                 })
         );
         fullscreen(rotated());
@@ -1231,7 +1231,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
         sDownloaddir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),getString(R.string.app_desc));
         streamer = new localStreamer(sDownloaddir.getAbsolutePath()); // initiate a stream to handle remote call to get local content
-                //Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
+        //Environment.getExternalStorageDirectory().toString()+"/"+sAppName;
 
         oDownloadMerger =  new DownloadMerger(this);
 
@@ -1436,7 +1436,7 @@ public class FullscreenActivity extends AppCompatActivity {
                             Launch();
                             return true;
                         }
-                            //String script = oSitePolicy.getScript(url);
+                        //String script = oSitePolicy.getScript(url);
                         String suburl=url.replaceAll("^(https://.*?)(http(?:s)?://.*)$","$2"),
                                 site = oSitePolicy.getKey(suburl,true),
                                 ref=defaultHeaders.get("Referer"),
@@ -1695,7 +1695,7 @@ public class FullscreenActivity extends AppCompatActivity {
         }
         setTitle(title);
         fullscreen(false);
-       if ( rotated ) {
+        if ( rotated ) {
             if (AUTO_HIDE) {
                 delayedHide(AUTO_HIDE_DELAY_MILLIS);
             }
