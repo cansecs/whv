@@ -510,14 +510,10 @@ public class FullscreenActivity extends AppCompatActivity {
         if ( view == null ){
             view = getWindow().getDecorView();
         }
-        if ( ! view.isShown() ){
+        if ( view == null || ! view.isShown() ){
             return;
         }
         int value = view.getSystemUiVisibility();
-
-        //mContentView.setFitsSystemWindows(false);
-        android.app.ActionBar ab = getActionBar();
-        ActionBar ab2 = getSupportActionBar();
 
         if ( isRotated) {
             value=
@@ -533,35 +529,10 @@ public class FullscreenActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE
                 ;
             }
-            //getActionBar().hide();
         }else{
-            value &= ~View.SYSTEM_UI_FLAG_FULLSCREEN
-            //|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            ;
-            //getActionBar().show();
-           /* if ( ab2 != null && !ab2.isShowing()){
-                ab2.show();
-            }else {
-                if (ab != null && !ab.isShowing()) {
-                    ab.show();
-                }
-            }
-            */
+            value &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
         }
-        //Log.d("Setting view",String.format("%s",value));
-        //view.getRootView().setFitsSystemWindows(!isRotated);
-        /*int topp=0;
-        if (!isRotated){
-            topp=paddingDp;
-        }
-        View otherview = mWebView;
-        if (mMenuView.isShown()){
-            otherview = mMenuView;
-        }
-        otherview.setPadding(0,topp,0,topp);*/
         view.setSystemUiVisibility(value);
-        //view.invalidate();
-
     }
 
     private boolean isEnglish(){
@@ -861,7 +832,7 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onStop();    //To change body of overridden methods use File | Settings | File Templates.
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
+        /*Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
                 "Fullscreen Page", // TODO: Define a title for the content shown.
                 // TODO: If you have web page content that matches this app activity's content,
@@ -875,7 +846,7 @@ public class FullscreenActivity extends AppCompatActivity {
         toggle();
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.disconnect();
+        client.disconnect();*/
     }
 
     protected void trusteveryssl(){
@@ -1195,7 +1166,8 @@ public class FullscreenActivity extends AppCompatActivity {
                 (new View.OnSystemUiVisibilityChangeListener(){
                     @Override
                     public void onSystemUiVisibilityChange(int visibility){
-                        // fullscreen(false);
+                    //   int height = view.getHeight(); // fullscreen(false);
+                        if ( visibility == 0 ) hide(true,500);
                         //getWindow().getDecorView().setPadding(0,paddingDp,0,0);
                     }
                 })
@@ -1735,7 +1707,7 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private void startStreamer(){
         if (isConnected()){
-            WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             if ( wm.getWifiState() == WifiManager.WIFI_STATE_ENABLED ) {
                 wm.getConnectionInfo().getIpAddress();
                 String deviceIp = Formatter.formatIpAddress(wm.getConnectionInfo()
