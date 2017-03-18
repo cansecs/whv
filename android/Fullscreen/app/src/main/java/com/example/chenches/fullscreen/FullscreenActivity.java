@@ -1167,7 +1167,9 @@ public class FullscreenActivity extends AppCompatActivity {
                     @Override
                     public void onSystemUiVisibilityChange(int visibility){
                     //   int height = view.getHeight(); // fullscreen(false);
-                        if ( visibility == 0 ) hide(true,500);
+                        if ( visibility == 0 ) hide();
+                        else delayedHide(AUTO_HIDE_DELAY_MILLIS);
+
                         //getWindow().getDecorView().setPadding(0,paddingDp,0,0);
                     }
                 })
