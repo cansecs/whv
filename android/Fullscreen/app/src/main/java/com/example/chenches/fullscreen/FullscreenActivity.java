@@ -135,7 +135,7 @@ public class FullscreenActivity extends AppCompatActivity {
      * and a change of the status and navigation bar.
      */
     private Menu oMenu;
-    private static final int UI_ANIMATION_DELAY = 500;
+    private static final int UI_ANIMATION_DELAY = 1000;
     private static String originalUA;
     private static boolean MENUSHOWN = false;
     private final Handler mHideHandler = new Handler();
