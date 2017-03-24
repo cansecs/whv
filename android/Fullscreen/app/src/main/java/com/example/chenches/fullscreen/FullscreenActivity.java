@@ -79,6 +79,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -878,9 +880,13 @@ public class FullscreenActivity extends AppCompatActivity {
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
                 @Override
-                public boolean verify(String s, SSLSession sslSession) {
-                    Log.d("Verify",s);
-                    return true;
+                public boolean verify(String hostname, SSLSession sslSession) {
+                    Log.d("Verify hostname",hostname);
+                    boolean safe = sslSession.isValid();
+                    if ( sSites != null && sSafeSite != null ) {
+                        safe =  safe || hostname.contains(sSafeSite) || hostname.toLowerCase().matches(sSites);
+                    }
+                    return safe;
                 }
             });
         } catch (Exception e) {
