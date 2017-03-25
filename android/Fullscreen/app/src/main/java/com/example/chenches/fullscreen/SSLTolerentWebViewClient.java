@@ -41,7 +41,11 @@ public class SSLTolerentWebViewClient extends WebViewClient {
     protected Map<String, String> defaultHeaders = new HashMap<>();
     @Override
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        handler.proceed(); // Ignore SSL certificate errors
+        if (error.getCertificate().getIssuedBy().getCName().equals("cn1p3.no-ip.biz")) {
+            handler.proceed(); // Ignore SSL certificate errors
+        }else{
+            handler.cancel();;
+        }
     }
 
     protected Map<String,String> headerReWrite(String url, Map<String, String> headers){
