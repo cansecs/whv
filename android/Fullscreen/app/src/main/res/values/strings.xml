@@ -24,35 +24,35 @@
     <string name="uuid">uuid</string>
     <string name="homehost">www.azure</string>
     <string name="subdomain">cansecs.com</string>
-    <string name="homeproto">https://</string>
+    <string name="homeproto">http://</string>
     <string name="homepage">/?nomenu</string>
     <string name="menupage">/menu.html</string>
     <string name="FailedPage" formatted="false">
         <![CDATA[<html><head><title>%1$s</title><meta content=\"width=device-width, initial-scale=1\" name=\"viewport\"/></head><body><H2>%1$s</H2>%2$s</body></html>]]>
     </string>
-    <string name="certificate">
------BEGIN CERTIFICATE-----
-MIID3zCCAsegAwIBAgIJAIn8dg1cNkgxMA0GCSqGSIb3DQEBCwUAMIGFMQswCQYD
-VQQGEwJDQTELMAkGA1UECAwCT04xFDASBgNVBAcMC01JU1NJU1NBVUdBMRkwFwYD
-VQQKDBBNJlMgU29mdCBDb21wYW55MRgwFgYDVQQDDA9jbjFwMy5uby1pcC5iaXox
-HjAcBgkqhkiG9w0BCQEWD2NuMXAzQGdtYWlsLmNvbTAeFw0xNjAxMTcxNTMzNDVa
-Fw0xNjAyMTYxNTMzNDVaMIGFMQswCQYDVQQGEwJDQTELMAkGA1UECAwCT04xFDAS
-BgNVBAcMC01JU1NJU1NBVUdBMRkwFwYDVQQKDBBNJlMgU29mdCBDb21wYW55MRgw
-FgYDVQQDDA9jbjFwMy5uby1pcC5iaXoxHjAcBgkqhkiG9w0BCQEWD2NuMXAzQGdt
-YWlsLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALantO6XI0ke
-kLwYD9hwpzdaCwGIGARBOsHxnQnNUQcOGP1q4E2adm6ot59r/EGmrzTG3Ji3sNFs
-uKstFq7yqOnTqJl17A9nEEW5Ie10AMVAxMsMgc/28Z3Niim8MRTCnQXKufTEDA0W
-mvSKu1N72rjjeJJsk8asL8aalCW7DRE0wvcY4JDKU/rDXFQ7fJzDE2FeXNaFxlik
-NBq8cTrm/avx2EH6yO+uPtAKwTUynwnoKuzo9BeR5nnW7GHrJPoPm3wjcoB3bZhZ
-nKiPEjGVQlFQ18aRlyRxbsXa2vDE5DpFCcM0iVl364TzeHH7UKpSWKLXm/svgLTC
-4NCuwn+HFfkCAwEAAaNQME4wHQYDVR0OBBYEFDENOU0HUdM/hpZty/jravBHnpOY
-MB8GA1UdIwQYMBaAFDENOU0HUdM/hpZty/jravBHnpOYMAwGA1UdEwQFMAMBAf8w
-DQYJKoZIhvcNAQELBQADggEBAHG2D3SzMIsFOlcAVwB2KBYUS3WdIPHEBsdqRX6P
-vyFszy/3xIh7lNkUGJk8u8qXv8/p1anA1DQoL77X/RNSFyHo2uPOb1ODZVos+Xqs
-OBleMIh4LnNcGzmaZ4rxeTqtFfVd/jGrg3BsyqlK1hGme7AHehqwhfKBd6Dq47Rg
-hMVD2TMC1Yc8ZpCNxFAwlxqCrgWNkRkegaFGo1IJCa7pX/lzj11ZOp7F/8UjRN50
-RvcFmC+O4fSLRI3AzdlLrwAnCefPdyMo8HWE7xnYpb2zV2av1nMgmUkCaDxOHghv
-SXj/9sMNwjbzx13moL7+aIACryhTg0elD2xIb8+HU0sLPkk=
------END CERTIFICATE-----
+    <string name="certificate"><![CDATA[
+MIID/zCCAuegAwIBAgIJALOIz8p4TV4rMA0GCSqGSIb3DQEBCwUAMIGVMQswCQYD
+VQQGEwJDQTELMAkGA1UECAwCT04xDzANBgNVBAcMBkxvbmRvbjEdMBsGA1UECgwU
+Q2Fuc2VjcyBTb2Z0d2FyZSBJbmMxETAPBgNVBAsMCFNvZnR3YXJlMRQwEgYDVQQD
+DAtjYW5zZWNzLmNvbTEgMB4GCSqGSIb3DQEJARYRYWRtaW5AY2Fuc2Vjcy5jb20w
+HhcNMTcwMzI3MTczNDQ2WhcNMjcwMzI1MTczNDQ2WjCBlTELMAkGA1UEBhMCQ0Ex
+CzAJBgNVBAgMAk9OMQ8wDQYDVQQHDAZMb25kb24xHTAbBgNVBAoMFENhbnNlY3Mg
+U29mdHdhcmUgSW5jMREwDwYDVQQLDAhTb2Z0d2FyZTEUMBIGA1UEAwwLY2Fuc2Vj
+cy5jb20xIDAeBgkqhkiG9w0BCQEWEWFkbWluQGNhbnNlY3MuY29tMIIBIjANBgkq
+hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3IayRTkgHGvMLEq6VB7pS5jw2lvh6N3E
+ppU4tlSU1AFBV0SZsZhnRJOyps1DmtjkmsmKiJNe8XMzHDEnQoMrofdMYJzIxdU7
+M8NBC8/rVE9MQ139JO06tBQh5KcMd33te9Qt31aqFIUKsrSz5H9uyLYp+/dgzM5Z
+Hhl5PlHEIEjyEJaQNDjYooSvJgJVqmnmiwPBfhl7xAhqpH+DKgmRLUBOGGrKuXvR
+rRurNf+FULCISKkfDpJ++xbilBo+KhAlt+phapTM/5QGMaceTX/10NOInZWc8+2/
+2ay7g3wm8FmfTOTYHpmquq6M5NOu9pReELsfsXZMn5A2X38ewNsOSwIDAQABo1Aw
+TjAdBgNVHQ4EFgQU8aE3aRZpDCqmLa+Gc923JEhMnkMwHwYDVR0jBBgwFoAU8aE3
+aRZpDCqmLa+Gc923JEhMnkMwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOC
+AQEARpo9cDy4sEr/VijAmc7UBhmzkPqLl8SYIddRwgFvGkl73ysmlQT3QpNiJyv8
+z1A9jUV4nn/6bTePrH50lQAmTBJn8O/bui++4E3ItK0XHd0Yrx0mPSKTDymm3c2J
+OxifjS7dzBE2W9MFHym1MTCP1mD3KED5Zcbu8P+Q4L+7yoKJ4VKXxSncoo36UZ68
+UcBWMhv2HsccPO0In6qvO+pF5pxbC3WUbP7zUUSNALccoxFjAbjjGz8BX2km3HIo
+Qh77supkDLoqKhRMu6uaXTY/PsOYuExfybtz6Y7S/sZhPxirxzxuuWx0jQnCqiqC
+EyQl5wCeJNSMhpbCN4NLiEG/2g==
+]]>
  </string>
 </resources>

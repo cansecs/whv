@@ -1,5 +1,7 @@
 package com.example.chenches.fullscreen;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.net.http.SslError;
@@ -40,12 +42,14 @@ public class SSLTolerentWebViewClient extends WebViewClient {
     static String blockURL = ""; // a pattrn to block unwanted URL
     protected Map<String, String> defaultHeaders = new HashMap<>();
     @Override
-    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        if (error.getCertificate().getIssuedBy().getCName().equals("cn1p3.no-ip.biz")) {
+    public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+
+/*        if (error.getCertificate().getIssuedBy().getCName().equals("cansecs.com")) {
             handler.proceed(); // Ignore SSL certificate errors
         }else{
             handler.cancel();;
-        }
+        }*/
+        handler.cancel();
     }
 
     protected Map<String,String> headerReWrite(String url, Map<String, String> headers){

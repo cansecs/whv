@@ -65,6 +65,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import org.json.JSONArray;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -78,6 +79,7 @@ import java.net.Inet4Address;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -96,6 +98,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 
@@ -867,24 +870,51 @@ public class FullscreenActivity extends AppCompatActivity {
 
                         @Override
                         public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                            Log.d("Certs",String.format("%d",certs.length));
                         }
 
                         @Override
                         public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                            Log.d("Certs",String.format("%d",certs.length));
                         }
                     }
             };
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate ca;
+            String cer = getString(R.string.certificate);
+            final String head="-----BEGIN CERTIFICATE-----",end="-----END CERTIFICATE-----";
+            String cert = String.format("%s\n%s\n%s",head,cer.replaceAll("\\s+","\n"),end);
+            ca = cf.generateCertificate(new ByteArrayInputStream(cert.getBytes()));
 
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, victimizedManager, new SecureRandom());
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keystore = KeyStore.getInstance(keyStoreType);
+            keystore.load(null,null);
+            keystore.setCertificateEntry("ca",ca);
+
+            // Create a TrustManager that trusts the CAs in our KeyStore
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keystore);
+
+// Create an SSLContext that uses our TrustManager
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, tmf.getTrustManagers(), new SecureRandom());
+
+            //SSLContext sc = SSLContext.getInstance("TLS");
+            //sc.init(null, victimizedManager, new SecureRandom());
+
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession sslSession) {
                     Log.d("Verify hostname",hostname);
                     boolean safe = sslSession.isValid();
-                    if ( sSites != null && sSafeSite != null ) {
-                        safe =  safe || hostname.contains(sSafeSite) || hostname.toLowerCase().matches(sSites);
+                    if ( !safe ) {
+                        if (sSites != null && sSafeSite != null) {
+                            safe = hostname.contains(sSafeSite) || hostname.toLowerCase().matches(sSites);
+                        }else{
+                            safe = true;
+                        }
                     }
                     return safe;
                 }
