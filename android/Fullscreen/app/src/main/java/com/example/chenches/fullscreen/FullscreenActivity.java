@@ -1220,7 +1220,7 @@ public class FullscreenActivity extends AppCompatActivity {
         // appnext = new Appnext(this);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        trusteveryssl();
+        //trusteveryssl();
         ActionBar actionBar = getSupportActionBar();
         try {
             actionBar.setDisplayHomeAsUpEnabled(true);
