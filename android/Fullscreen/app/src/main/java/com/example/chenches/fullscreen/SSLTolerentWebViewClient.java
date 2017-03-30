@@ -1,14 +1,10 @@
 package com.example.chenches.fullscreen;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.net.http.SslError;
+
 import android.os.Build;
 import android.util.Log;
-import android.webkit.CookieManager;
-import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -29,7 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by chenches on 8/17/2016.
@@ -41,16 +36,7 @@ public class SSLTolerentWebViewClient extends WebViewClient {
     protected boolean oldversion = false;
     static String blockURL = ""; // a pattrn to block unwanted URL
     protected Map<String, String> defaultHeaders = new HashMap<>();
-    @Override
-    public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
 
-/*        if (error.getCertificate().getIssuedBy().getCName().equals("cansecs.com")) {
-            handler.proceed(); // Ignore SSL certificate errors
-        }else{
-            handler.cancel();;
-        }*/
-        handler.cancel();
-    }
 
     protected Map<String,String> headerReWrite(String url, Map<String, String> headers){
         /*String ref=headers.get(referer);

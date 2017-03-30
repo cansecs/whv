@@ -62,44 +62,20 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import org.json.JSONArray;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.Inet4Address;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.RunnableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 
 /**
@@ -854,75 +830,7 @@ public class FullscreenActivity extends AppCompatActivity {
         client.disconnect();*/
     }
 
-    protected void trusteveryssl(){
 
-        try {
-            TrustManager[] victimizedManager = new TrustManager[]{
-
-                    new X509TrustManager() {
-
-                        public X509Certificate[] getAcceptedIssuers() {
-
-                            X509Certificate[] myTrustedAnchors = new X509Certificate[0];
-
-                            return myTrustedAnchors;
-                        }
-
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                            Log.d("Certs",String.format("%d",certs.length));
-                        }
-
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                            Log.d("Certs",String.format("%d",certs.length));
-                        }
-                    }
-            };
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate ca;
-            String cer = getString(R.string.certificate);
-            final String head="-----BEGIN CERTIFICATE-----",end="-----END CERTIFICATE-----";
-            String cert = String.format("%s\n%s\n%s",head,cer.replaceAll("\\s+","\n"),end);
-            ca = cf.generateCertificate(new ByteArrayInputStream(cert.getBytes()));
-
-            String keyStoreType = KeyStore.getDefaultType();
-            KeyStore keystore = KeyStore.getInstance(keyStoreType);
-            keystore.load(null,null);
-            keystore.setCertificateEntry("ca",ca);
-
-            // Create a TrustManager that trusts the CAs in our KeyStore
-            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-            tmf.init(keystore);
-
-// Create an SSLContext that uses our TrustManager
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, tmf.getTrustManagers(), new SecureRandom());
-
-            //SSLContext sc = SSLContext.getInstance("TLS");
-            //sc.init(null, victimizedManager, new SecureRandom());
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession sslSession) {
-                    Log.d("Verify hostname",hostname);
-                    boolean safe = sslSession.isValid();
-                    if ( !safe ) {
-                        if (sSites != null && sSafeSite != null) {
-                            safe = hostname.contains(sSafeSite) || hostname.toLowerCase().matches(sSites);
-                        }else{
-                            safe = true;
-                        }
-                    }
-                    return safe;
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     private class menuActions{
         public boolean show(){
             if ( mMenuView.getVisibility() == WebView.INVISIBLE){
