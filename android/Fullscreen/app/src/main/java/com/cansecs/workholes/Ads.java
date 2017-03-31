@@ -1,4 +1,4 @@
-package com.example.chenches.fullscreen;
+package com.cansecs.workholes;
 
 import android.app.Activity;
 import android.app.Dialog;

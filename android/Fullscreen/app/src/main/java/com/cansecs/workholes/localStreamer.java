@@ -1,4 +1,4 @@
-package com.example.chenches.fullscreen;
+package com.cansecs.workholes;
 
 /**
  * A streamer class allows share local download media to browser within the same LAN

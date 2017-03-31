@@ -6,7 +6,7 @@
     android:paddingBottom="0px"
     android:paddingTop="0px"
     android:id="@+id/whole"
-    tools:context="com.example.chenches.fullscreen.FullscreenActivity"
+    tools:context="com.cansecs.workholes.FullscreenActivity"
     android:clickable="false">
 
     <!-- The primary full-screen view. This can be replaced with whatever view

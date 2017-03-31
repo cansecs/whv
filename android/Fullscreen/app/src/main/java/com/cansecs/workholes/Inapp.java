@@ -1,4 +1,4 @@
-package com.example.chenches.fullscreen;
+package com.cansecs.workholes;
 
 /**
  * Created by sam on 12/01/17.

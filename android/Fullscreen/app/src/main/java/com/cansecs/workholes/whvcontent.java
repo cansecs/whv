@@ -1,4 +1,4 @@
-package com.example.chenches.fullscreen;
+package com.cansecs.workholes;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

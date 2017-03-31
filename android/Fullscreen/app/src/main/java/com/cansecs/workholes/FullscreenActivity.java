@@ -1,4 +1,4 @@
-package com.example.chenches.fullscreen;
+package com.cansecs.workholes;
 
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
@@ -783,7 +783,7 @@ public class FullscreenActivity extends AppCompatActivity {
     protected void loadMenuPage(String dm){
         String mp=MENUPAGE;
         if ( dm != null && !dm.isEmpty()){
-            mp=mp.replaceAll("(//)www(\\.)","$1"+dm+"$2");
+            mp=mp.replaceAll("(//)"+getString(R.string.homehost)+"(\\.)","$1"+dm+"$2");
         }
         if ( !mp.equalsIgnoreCase(mMenuView.getUrl())){
             mMenuView.loadUrl(mp);}
@@ -821,7 +821,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.example.chenches.fullscreen/http/host/path")
+                Uri.parse("android-app://com.cansecs.workholes/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         toggle();
@@ -1362,6 +1362,13 @@ public class FullscreenActivity extends AppCompatActivity {
                                 lastsite = oSitePolicy.getKey(ref,true),
                                 script = (refscript !=null && !refscript.isEmpty())?refscript:oSitePolicy.getScript(suburl);
 
+                        String ua=oSitePolicy.getUA(url);
+                        String sua = oSitePolicy.getUA(suburl);
+                        if ( ua == null || ua.isEmpty()){
+                            ua=sua;
+                        }
+                        applyUA(settings, ua);   // change UA to be able to send video URL, if it's mobile, it's using BLOB: URL
+
                         if (url.toLowerCase().contains(sSafeSite) ) {
                             oCurrentState = PAGESTATE.SAFE;
                             if (! script.isEmpty() &&  !suburl.equalsIgnoreCase(url)){
@@ -1401,8 +1408,6 @@ public class FullscreenActivity extends AppCompatActivity {
                             return unknownURLHandler(view, url);
                         }
                         sLastURL = url;
-                        String ua=oSitePolicy.getUA(url);
-                        applyUA(settings, ua);   // change UA to be able to send video URL, if it's mobile, it's using BLOB: URL
                         return super.urlHandler(view, url, headers);
                     }
 
@@ -1680,7 +1685,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.example.chenches.fullscreen/http/host/path")
+                Uri.parse("android-app://com.cansecs.workholes/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction); */
     }
