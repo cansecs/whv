@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -1121,7 +1122,10 @@ public class FullscreenActivity extends AppCompatActivity {
         fullscreen(rotated());
         Downloader = (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)){
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+
         } // enable webview debug?
         //Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
         UA = getString(R.string.app_name);
